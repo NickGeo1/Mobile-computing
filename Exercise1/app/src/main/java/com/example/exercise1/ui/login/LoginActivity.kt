@@ -1,4 +1,4 @@
-package com.example.exercise1.ui.Login
+package com.example.exercise1.ui.login
 
 
 

@@ -1,10 +1,12 @@
 package com.example.exercise1
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.exercise1.ui.Login.Login
+import com.example.exercise1.ui.login.Login
+import com.example.exercise1.ui.profile.ProfileActivity
+import com.example.exercise1.ui.reminder.ReminderActivity
+
 @Composable
 fun ApplicationActivities(appState: ApplicationState = rememberAppState())
 {
@@ -16,14 +18,14 @@ fun ApplicationActivities(appState: ApplicationState = rememberAppState())
         {
             Login(navController = appState.navController)
         }
-//        composable(route = "main")
-//        {
-//            Home(navController = appState.navController)
-//        }
-//        composable(route="profile")
-//        {
-//            Payment(onBackPress = appState::navigateBack) //take the method appState.navigateBack() as param
-//        }
+        composable(route = "main")
+        {
+           ReminderActivity(appState.navController)
+        }
+        composable(route="profile")
+        {
+            ProfileActivity(appState.navController) //take the method appState.navigateBack() as param
+        }
 
     }
 }
