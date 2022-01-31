@@ -1,7 +1,5 @@
 package com.example.exercise1.ui.login
 
-
-
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -26,14 +24,18 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.exercise1.R
 import com.example.exercise1.rememberAppState
+import com.example.exercise1.ui.defButton
+import com.example.exercise1.ui.defText
 import com.example.exercise1.ui.theme.Shapes
+import com.example.exercise1.ui.theme.bgyellow
+import com.example.exercise1.ui.theme.mainorange
 import com.google.accompanist.insets.systemBarsPadding
 
 @Composable
 fun Login(
     navController: NavController
 ){
-    Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFFFFFD89))
+    Surface(modifier = Modifier.fillMaxSize(), color = bgyellow)
     { //the surface of the screen controls
         val password = rememberSaveable { mutableStateOf("") }
         val username = rememberSaveable { mutableStateOf("") }
@@ -50,17 +52,24 @@ fun Login(
             verticalArrangement = Arrangement.Center //all elements of column at the center
         )
         {
-            Text(text = "Welcome to Remindme!", fontSize = 26.sp, fontFamily = FontFamily.Serif)
+            Text(text = "Welcome to Remindme!",
+                fontSize = 26.sp,
+                fontFamily = FontFamily.Serif)
+
             Spacer(modifier = Modifier.height(30.dp))
+
             Icon( //an Icon inside the column
                 imageVector = Icons.Default.Notifications,
                 contentDescription = null,
                 modifier = Modifier.size(180.dp),
-                tint = Color(0xFFFFA500)
-            )
+                tint = mainorange)
+
             Spacer(modifier = Modifier.height(10.dp)) //a spacer inside column(spaced bellow icon)
-            Text(text = "Login into your Remindme account:", fontSize = 17.sp, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold)
+
+            defText("Login into your Remindme account:")
+
             Spacer(modifier = Modifier.height(10.dp))
+
             TextField( //textbox for username inside the column
                 value = username.value,
                 onValueChange = {data -> username.value = data}, //data is the current text and
@@ -71,7 +80,9 @@ fun Login(
                 ),
                 shape = Shapes.medium
             )
+
             Spacer(modifier = Modifier.height(10.dp))
+
             TextField( //textbox for password inside the column
                 value = password.value,
                 onValueChange = {data -> password.value = data},
@@ -83,19 +94,13 @@ fun Login(
                 visualTransformation = PasswordVisualTransformation(), //for hidden text
                 shape = Shapes.medium
             )
+
             Spacer(modifier = Modifier.height(70.dp))
-            Button( //button inside column
-                onClick = { navController.navigate("main") }, //navigate to home/payment
-                enabled = true,
-                modifier = Modifier
-                    .width(220.dp)
-                    .size(55.dp),
-                shape = Shapes.small, //set roundness
-                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFFFA500))
-            )
-            {
-                Text(text = "Login",color = Color.Black, fontSize = 17.sp, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold)
-            }
+
+            defButton(onclick = {
+                //user_name = username.value
+                navController.navigate("main")},
+                text = "Login")
         }
     }
 

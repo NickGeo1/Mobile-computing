@@ -1,4 +1,4 @@
-package com.example.exercise1.ui.entities
+package com.example.exercise1.entities
 
 import java.util.*
 

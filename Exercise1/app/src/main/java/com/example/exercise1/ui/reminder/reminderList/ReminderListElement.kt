@@ -1,4 +1,4 @@
-package com.example.exercise1.ui.reminder.categoryPayment
+package com.example.exercise1.ui.reminder.reminderList
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,19 +15,17 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.exercise1.ui.entities.Reminder
+import com.example.exercise1.entities.Reminder
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -89,7 +87,7 @@ private fun ReminderListItem(
                     end = icon.start,
                     startMargin = 24.dp,
                     endMargin = 16.dp,
-                    bias = 0f // float this towards the start. this was is the fix we needed
+                    bias = 0f
                 )
                 top.linkTo(parent.top, margin = 10.dp)
                 width = Dimension.preferredWrapContent
@@ -107,7 +105,7 @@ private fun ReminderListItem(
                     end = icon.start,
                     startMargin = 24.dp,
                     endMargin = 8.dp,
-                    bias = 0f // float this towards the start. this was is the fix we needed
+                    bias = 0f
                 )
                 top.linkTo(title.bottom, margin = 6.dp)
                 bottom.linkTo(parent.bottom, 10.dp)
@@ -130,7 +128,7 @@ private fun ReminderListItem(
                     end = icon.start,
                     startMargin = 8.dp,
                     endMargin = 16.dp,
-                    bias = 0f // float this towards the start. this was is the fix we needed
+                    bias = 0f
                 )
                 centerVerticallyTo(id)
                 top.linkTo(title.bottom, 6.dp)

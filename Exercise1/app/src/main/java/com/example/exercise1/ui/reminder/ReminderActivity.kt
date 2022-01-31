@@ -1,40 +1,25 @@
 package com.example.exercise1.ui.reminder
 
-import android.provider.CalendarContract
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
-import androidx.compose.material.ScrollableTabRow
-import androidx.compose.material.Surface
-import androidx.compose.material.Tab
-import androidx.compose.material.TabPosition
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.exercise1.rememberAppState
-import com.example.exercise1.ui.reminder.categoryPayment.ReminderListElement
+import com.example.exercise1.ui.reminder.reminderList.ReminderListElement
 import com.example.exercise1.ui.theme.bgyellow
 import com.example.exercise1.ui.theme.mainorange
 import com.google.accompanist.insets.systemBarsPadding
@@ -57,14 +42,13 @@ fun ReminderActivity(
                     contentDescription = "add_btn",
                 )
             }
-        }
+        }, backgroundColor = bgyellow
     ){
         Column(
             modifier = Modifier
                 .systemBarsPadding()
                 .fillMaxWidth()
         ) {
-
             ReminderAppBar(nav)
             ReminderListElement()
         }
