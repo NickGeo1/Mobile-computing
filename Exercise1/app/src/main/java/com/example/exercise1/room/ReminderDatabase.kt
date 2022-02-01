@@ -4,10 +4,11 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.example.exercise1.entities.User
 
+//Database schema of application
 
 @Database(
     entities = [User::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class ReminderDatabase : RoomDatabase() {

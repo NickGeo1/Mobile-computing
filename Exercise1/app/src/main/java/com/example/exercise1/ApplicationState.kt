@@ -15,7 +15,6 @@ class ApplicationState(val navController: NavHostController)
     }
 }
 
-
 @Composable
 fun rememberAppState(
     navController: NavHostController = rememberNavController()

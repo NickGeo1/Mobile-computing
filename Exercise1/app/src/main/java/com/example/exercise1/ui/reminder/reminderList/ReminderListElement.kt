@@ -15,6 +15,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -149,7 +150,7 @@ private fun ReminderListItem(
                 }
         ) {
             Icon(
-                imageVector = Icons.Filled.Notifications,
+                imageVector = Icons.Filled.Edit,
                 contentDescription = "edit_btn"
             )
         }

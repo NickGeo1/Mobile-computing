@@ -18,18 +18,22 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.exercise1.entities.User
 import com.example.exercise1.rememberAppState
+import com.example.exercise1.ui.defTopbarTextandIconbutton
 import com.example.exercise1.ui.reminder.reminderList.ReminderListElement
 import com.example.exercise1.ui.theme.bgyellow
 import com.example.exercise1.ui.theme.mainorange
 import com.google.accompanist.insets.systemBarsPadding
 
+//Our main activity. Here we are going to show,add,edit and delete our reminders
+
 @Composable
 fun ReminderActivity(
-    nav: NavHostController
+    nav: NavHostController,
+    username: String
 ) {
     Scaffold(
-        modifier = Modifier.padding(bottom = 24.dp),
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {/*TODO*/ },
@@ -49,7 +53,7 @@ fun ReminderActivity(
                 .systemBarsPadding()
                 .fillMaxWidth()
         ) {
-            ReminderAppBar(nav)
+            ReminderAppBar(nav, username)
             ReminderListElement()
         }
     }
@@ -57,36 +61,29 @@ fun ReminderActivity(
 
 @Composable
 private fun ReminderAppBar(
-    nav: NavHostController
+    nav: NavHostController,
+    username: String?
 )
 {      //for top app bar
     TopAppBar(
         title = {
-            IconButton(onClick = {nav.navigate("login")}){  //when we press back we go at login page
-                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "logout_btn")
-            }
-            Text(
-                text = "Logout",        //Logout logo
-                color = bgyellow,
-                modifier = Modifier
-                    .padding(bottom = 2.dp),
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp)
+            defTopbarTextandIconbutton(
+                onclick = {nav.navigate("login")},
+                iconcntndesc = "logout_btn",
+                text = "Logout"
+            )
         },
         backgroundColor = mainorange,
-        actions = {IconButton(onClick = {nav.navigate("profile")}) {  //when we press we go at profile page
+        actions = {IconButton(onClick = {nav.navigate("profile/${username}")}) {  //when we press we go at profile page
             Icon(imageVector = Icons.Default.Person, contentDescription = "profile_btn", Modifier)
-        }
             }
+        }
     )
 }
-
-
-
 
 @Preview
 @Composable
 fun Preview(){
     val appState = rememberAppState()
-    ReminderActivity(appState.navController)
+    ReminderActivity(appState.navController, "TEST")
 }

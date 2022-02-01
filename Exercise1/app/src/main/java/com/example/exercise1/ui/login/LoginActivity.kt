@@ -15,15 +15,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.exercise1.R
-import com.example.exercise1.rememberAppState
+import com.example.exercise1.UserInitialisaton
 import com.example.exercise1.ui.defButton
 import com.example.exercise1.ui.defText
 import com.example.exercise1.ui.theme.Shapes
@@ -66,7 +64,7 @@ fun Login(
 
             Spacer(modifier = Modifier.height(10.dp)) //a spacer inside column(spaced bellow icon)
 
-            defText("Login into your Remindme account:")
+            defText("Login into your Remindme account:", color = Color.Black)
 
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -98,18 +96,17 @@ fun Login(
             Spacer(modifier = Modifier.height(70.dp))
 
             defButton(onclick = {
-                //user_name = username.value
-                navController.navigate("main")},
+                UserInitialisaton().validateUser(username.value, password.value, navController)},   //check if the user details are correct
                 text = "Login")
         }
     }
 
 }
 
-@Preview
-@Composable
-fun DefaultPreview() {
-    val appState = rememberAppState()
-    Login(navController = appState.navController)
-
-}
+//@Preview
+//@Composable
+//fun DefaultPreview() {
+//    val appState = rememberAppState()
+//    Login(navController = appState.navController)
+//
+//}
