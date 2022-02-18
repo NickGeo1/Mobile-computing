@@ -6,6 +6,7 @@ import com.example.exercise3.room.UserDao
 class UserRepository(private val userDao: UserDao){
 
     suspend fun selectUser(un: String) = userDao.selectUser(un)
+    suspend fun selectUserFromId(id: Long) = userDao.selectUserFromId(id)
 
     suspend fun insertUser(user: User) { //in case we insert a user that exists, do nothing, else insert
        when(val temp = userDao.selectUser(user.username)){
