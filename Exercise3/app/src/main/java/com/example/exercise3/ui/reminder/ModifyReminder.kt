@@ -87,7 +87,15 @@ fun ModifyReminder(nav: NavController,
         context,
         { _, year: Int, month: Int, dayOfMonth: Int ->
             TimePickerDialog(context, { _, hour: Int, minute: Int ->
-                reminder_date.value = "$dayOfMonth/${month+1}/$year $hour:$minute" //we add 1 to month because months begin from 0
+                val correcthour = when{
+                    hour < 10 -> "0"+hour.toString()
+                    else -> hour
+                }
+                val correctminute = when{
+                    minute < 10 -> "0"+minute.toString()
+                    else -> minute
+                }
+                reminder_date.value = "$dayOfMonth/${month+1}/$year $correcthour:$correctminute" //we add 1 to month because months begin from 0
             }, firsthour, firstminute,true).show()
         }, firstyear, firstmonth, firstday
     )
