@@ -16,8 +16,12 @@ class ReminderRepository(private val reminderDao: ReminderDao) {
 
     suspend fun deleteReminder(entity: Reminder) = reminderDao.deleteReminder(entity)
 
-    fun selectuserReminders(uid: Long): Flow<List<Reminder>>{
-        return reminderDao.selectuserReminders(uid)
+    fun selectuserUnseenReminders(uid: Long): Flow<List<Reminder>>{
+        return reminderDao.selectuserUnseenReminders(uid)
+    }
+
+    suspend fun selectuserSeenReminders(uid: Long): List<Reminder>{
+        return reminderDao.selectuserSeenReminders(uid)
     }
 
     suspend fun selectReminderfromid(id: Long) = reminderDao.selectReminderfromid(id)

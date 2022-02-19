@@ -3,11 +3,14 @@ package com.example.exercise3
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import androidx.work.ListenableWorker
 import com.example.exercise3.entities.Reminder
 import com.example.exercise3.entities.User
 import com.example.exercise3.repository.ReminderRepository
 import com.example.exercise3.repository.UserRepository
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 
 //This class is for the database management of the users. We initialise some users at the beginning
 

@@ -6,8 +6,11 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 abstract class ReminderDao {
-    @Query(value = "SELECT * FROM reminders WHERE creator_id = :uid")
-    abstract fun selectuserReminders(uid: Long): Flow<List<Reminder>> //When we want to select all the reminders of a user
+    @Query(value = "SELECT * FROM reminders WHERE creator_id = :uid and reminder_seen = 0")
+    abstract fun selectuserUnseenReminders(uid: Long): Flow<List<Reminder>> //When we want to select all the reminders of a user
+
+    @Query(value = "SELECT * FROM reminders WHERE creator_id = :uid and reminder_seen = 1")
+    abstract suspend fun selectuserSeenReminders(uid: Long): List<Reminder> //When we want to select all the seen reminders of a user
 
     @Query(value = "SELECT * FROM reminders WHERE id = :id")
     abstract suspend fun selectReminderfromid(id: Long): Reminder //When we want to select a reminder by id

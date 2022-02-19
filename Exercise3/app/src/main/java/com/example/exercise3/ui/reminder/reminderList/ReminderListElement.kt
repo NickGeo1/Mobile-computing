@@ -32,9 +32,10 @@ fun ReminderListElement(username:String, userid: String, nav: NavController)
     )
     val viewState by viewModel.state.collectAsState()
 
+    println(viewState.seenreminders)
     Column(modifier = Modifier.fillMaxWidth()) {
         ReminderList(
-            list = viewState.reminders,
+            list = viewState.seenreminders,
             nav = nav,
             userid = userid,
             username = username

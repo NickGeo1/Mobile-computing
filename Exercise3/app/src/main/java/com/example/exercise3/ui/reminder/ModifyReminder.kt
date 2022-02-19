@@ -26,6 +26,7 @@ import com.example.exercise3.ui.theme.bgyellow
 import com.example.exercise3.ui.theme.mainorange
 import com.example.exercise3.util.viewModelProviderFactoryOf
 import com.google.accompanist.insets.systemBarsPadding
+import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
@@ -86,7 +87,7 @@ fun ModifyReminder(nav: NavController,
         context,
         { _, year: Int, month: Int, dayOfMonth: Int ->
             TimePickerDialog(context, { _, hour: Int, minute: Int ->
-                reminder_date.value = "$dayOfMonth/$month/$year $hour:$minute"
+                reminder_date.value = "$dayOfMonth/${month+1}/$year $hour:$minute" //we add 1 to month because months begin from 0
             }, firsthour, firstminute,true).show()
         }, firstyear, firstmonth, firstday
     )
@@ -199,7 +200,8 @@ fun ModifyReminder(nav: NavController,
                         creator_id = userid.toLong(),
                         creation_time = Date().time,
                         reminder_time = reminder_date.value,
-                        reminder_seen = false), nav)
+                        reminder_seen = isPastDate(reminder_date.value)
+                    ), nav)
 
                 }
             } , text = "Done")
@@ -207,5 +209,15 @@ fun ModifyReminder(nav: NavController,
     }
 }
 
+fun isPastDate(newremtime:String):Boolean{
+    val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm")
+    val newremindertime = formatter.parse(newremtime)
+    val currenttime = formatter.parse(formatter.format(Date()))
+    val comparer = newremindertime.compareTo(currenttime)
+    return when{
+        comparer <= 0 -> true
+        else -> false
+    }
+}
 
 
