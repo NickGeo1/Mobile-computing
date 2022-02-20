@@ -22,10 +22,7 @@ class ReminderNotificationWorker(
         var currentdate: Date
         while (true){
             currentdate = formatter.parse(formatter.format(Date())) //format the current date to the correct string form and then parse to Date
-            if(currentdate.compareTo(reminderdate) > 0) { //in this case we return failure for the specific notification because it's time has passed
-                return Result.failure()
-            }
-            if(currentdate.compareTo(reminderdate) == 0) { //when the current date is equal to the reminder date
+            if(currentdate.compareTo(reminderdate) >= 0) { //when the current date is equal or past to the reminder date
                 return Result.success()
             }
         }

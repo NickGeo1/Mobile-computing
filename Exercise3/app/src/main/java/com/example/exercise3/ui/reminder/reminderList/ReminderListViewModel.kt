@@ -1,27 +1,20 @@
 package com.example.exercise3.ui.reminder.reminderList
 
-import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.os.Build
-import android.os.SystemClock
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.*
 import com.example.exercise3.Graph
-import com.example.exercise3.UserInitialisaton
 import com.example.exercise3.entities.Reminder
 import com.example.exercise3.repository.ReminderRepository
 import com.example.exercise3.repository.UserRepository
 import com.example.exercise3.util.ReminderNotificationWorker
 import exercise2.R
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
@@ -51,11 +44,9 @@ class ReminderListViewModel(private val reminder_id:String,
     }
 
     private fun checkReminderNotification(reminder: Reminder, username: String) {
-        Log.i("Dates ", "arxhTodaysetwywsy4rtzswt4")
         val workManager = WorkManager.getInstance(Graph.appContext)
         val notificationWorker = OneTimeWorkRequestBuilder<ReminderNotificationWorker>() //we use the doWork method on ReminderNotificationWorker class to do our work
         val data = Data.Builder() //for parameter pass at ReminderNotificationWorker class constructor
-        //data.putAll(mapOf("Reminder" to reminder)) //set the reminder parameter
         data.putString("Date", reminder.reminder_time)
         notificationWorker.setInputData(data.build()) //pass the parameters
         val notificationWorkerbuilded = notificationWorker.build()
@@ -105,7 +96,7 @@ private fun createReminderDueNotification(reminder: Reminder, username: String){
     val builder = NotificationCompat.Builder(Graph.appContext, "CHANNEL_ID")
         .setSmallIcon(R.drawable.ic_launcher_background)
         .setContentTitle("Reminder occurring for user $username")
-        .setContentText("Reminder ${reminder.message} is occurring now at location (${reminder.location_x},${reminder.location_y})")
+        .setStyle(NotificationCompat.BigTextStyle().bigText("Reminder ${reminder.message} is occurring now at location (${reminder.location_x},${reminder.location_y})"))
         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
     with(NotificationManagerCompat.from(Graph.appContext)) {
