@@ -1,15 +1,9 @@
 package com.example.exercise3.util
 
-import android.annotation.SuppressLint
 import android.content.Context
-import android.os.Build
-import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import java.lang.Exception
-import java.text.SimpleDateFormat
-import java.util.*
 
 class ReminderNotificationWorker(
     context: Context,
@@ -17,15 +11,13 @@ class ReminderNotificationWorker(
 ) : Worker(context, userParameters) {
 
     override fun doWork(): Result {
-        val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm")
-        val reminderdate = formatter.parse(inputData.getString("Date")) //get the reminder date string and parse it to Date
-        var currentdate: Date
-        while (true){
-            currentdate = formatter.parse(formatter.format(Date())) //format the current date to the correct string form and then parse to Date
-            if(currentdate.compareTo(reminderdate) >= 0) { //when the current date is equal or past to the reminder date
-                return Result.success()
-            }
+        return try{
+            println("Interval completed, Work returning success")
+            Result.success()
+        }catch(e:Exception){
+            Result.failure()
         }
+
     }
 
 }

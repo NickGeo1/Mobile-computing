@@ -36,7 +36,7 @@ fun ModifyReminder(nav: NavController,
                    reminder_id: String,
                    viewModel: ReminderListViewModel = viewModel(
                        key = "user_reminder_$reminder_id",
-                       factory = viewModelProviderFactoryOf { ReminderListViewModel(reminder_id,"0") }
+                       factory = viewModelProviderFactoryOf { ReminderListViewModel(reminder_id,"0", nav) }
                    )
                 )
 {
@@ -44,7 +44,7 @@ fun ModifyReminder(nav: NavController,
     //This is the case of creation of new reminder. In the case of editing, we provide the chosen reminder's
     //id to this context so the reminder object is not null and we can fill the textboxes
     val viewState by viewModel.state.collectAsState()
-    val reminder = viewState.reminder
+    val reminder = viewState.editreminder
 
     val reminder_message = when(reminder){
         null->rememberSaveable { mutableStateOf("") }

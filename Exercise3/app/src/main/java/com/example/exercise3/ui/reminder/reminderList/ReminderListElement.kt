@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -19,33 +20,60 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.exercise3.UserInitialisaton
 import com.example.exercise3.entities.Reminder
+import com.example.exercise3.repository.UserRepository
+import com.example.exercise3.ui.defButton
 import com.example.exercise3.util.viewModelProviderFactoryOf
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
-fun ReminderListElement(username:String, userid: String, nav: NavController)
+fun ReminderListElement(username:String, userid:String, nav:NavController)
 {
+    val show_btn_text = rememberSaveable { mutableStateOf("Show all")}
+    val show_all = rememberSaveable { mutableStateOf(false)}
+
     val viewModel: ReminderListViewModel = viewModel(
         key = "user_list_$userid",
-        factory = viewModelProviderFactoryOf { ReminderListViewModel("0",userid) }
+        factory = viewModelProviderFactoryOf { ReminderListViewModel("0",userid,nav) }
     )
     val viewState by viewModel.state.collectAsState()
+    var showlist: List<Reminder> by remember {  mutableStateOf(listOf()) }
+    val coroutineScope = rememberCoroutineScope()
 
-    println(viewState.seenreminders)
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         ReminderList(
-            list = viewState.seenreminders,
+            list = if(showlist.isEmpty()){
+                //if we assign this to showlist, the first time is null.
+                //If we change the viewState.showreminders at every button press, sometimes doesnt work
+                viewState.showreminders
+            }else{
+                 showlist
+                 },
             nav = nav,
-            userid = userid,
             username = username
         )
+        Spacer(Modifier.height(30.dp))
+        defButton(onclick = {
+            if(show_btn_text.value.equals("Show all"))
+            {
+                show_btn_text.value = "Show seen"
+                show_all.value = true
+            }else
+            {
+                show_btn_text.value = "Show all"
+                show_all.value = false
+            }
+            coroutineScope.launch {
+                showlist = viewModel.changeShow(show_all.value) //we return the new results at showlist that changes the lazycolumn
+            }
+        }, text = show_btn_text.value)
     }
+
 }
 
 @Composable
 private fun ReminderList(
-    userid: String,
     list: List<Reminder>,
     nav: NavController,
     username:String
@@ -79,9 +107,8 @@ private fun ReminderList(
                 },
                 modifier = Modifier.fillParentMaxWidth(),
                 nav = nav,
-                userid = userid,
+                userid = item.creator_id.toString(),
                 username = username,
-                //random_picture = piclist.random() //random picture for this list element
             )
         }
     }
@@ -110,7 +137,6 @@ private fun ReminderListItem(
     nav: NavController,
     userid: String,
     username: String,
-    //picture: Painter
 ) {
     ConstraintLayout(modifier = modifier.clickable { onClick() }) {
         val (divider, id, title, row, date) = createRefs()
@@ -188,9 +214,6 @@ private fun ReminderListItem(
         )
         {
 
-            //Image(painter = image, contentDescription = "",
-                //modifier = Modifier.size(50.dp).padding(6.dp))
-
             // icon for edit
             IconButton(
                 onClick = { nav.navigate(route="modify_reminder/$username/$userid/${reminder.id}") },
@@ -206,11 +229,12 @@ private fun ReminderListItem(
             }
 
             IconButton( // icon for delete
-                onClick = { UserInitialisaton.deleteReminder(reminder) },
+                onClick = { UserInitialisaton.deleteReminder(reminder)
+                    nav.navigate("main/$username/$userid")}, //we renavigate after the delete so we can see the results
                 modifier = Modifier
                     .size(50.dp)
                     .padding(6.dp)
-            ) {
+                ) {
                 Icon(
                     imageVector = Icons.Filled.Delete,
                     contentDescription = "delete_btn"

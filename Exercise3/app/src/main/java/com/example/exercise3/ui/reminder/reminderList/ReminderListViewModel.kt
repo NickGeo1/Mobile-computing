@@ -8,8 +8,10 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
 import androidx.work.*
 import com.example.exercise3.Graph
+import com.example.exercise3.UserInitialisaton
 import com.example.exercise3.entities.Reminder
 import com.example.exercise3.repository.ReminderRepository
 import com.example.exercise3.repository.UserRepository
@@ -19,9 +21,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
+import java.util.concurrent.TimeUnit
 
 class ReminderListViewModel(private val reminder_id:String,
                             private val userid: String,
+                            private val navController: NavController,
                             private val reminderRepository: ReminderRepository = Graph.reminderRepository,
                             private val userRepository: UserRepository = Graph.userRepository) : ViewModel() {
     private val _state = MutableStateFlow(ReminderViewState())
@@ -29,38 +35,38 @@ class ReminderListViewModel(private val reminder_id:String,
     val state: StateFlow<ReminderViewState>
         get() = _state
 
+    suspend fun changeShow(showall: Boolean): List<Reminder>{
+        return reminderRepository.selectuserReminders(userid.toLong(), showall)
+    }
+
     init {
         createNotificationChannel(context = Graph.appContext) //create the notification channel
-        //We provide a list of the seen reminders in the viewmodel state
+                                //In the case of reminder list//
+        //Initialy, we provide a list of the seen reminders in the viewmodel state
         //We make a work for each unseen reminder and check if its time for notification
+
+                                //In the case of reminder edit//
+        //We provide the user's selected reminder on the viewmodelstate
         viewModelScope.launch {
             reminderRepository.selectuserUnseenReminders(userid.toLong()).collect { list ->
-                _state.value = ReminderViewState(seenreminders = reminderRepository.selectuserSeenReminders(userid.toLong()), reminder = reminderRepository.selectReminderfromid(reminder_id.toLong()))
+                _state.value = ReminderViewState(showreminders = reminderRepository.selectuserReminders(userid.toLong(),false), editreminder = reminderRepository.selectReminderfromid(reminder_id.toLong()))
                 list.forEach{
-                    checkReminderNotification(it, userRepository.selectUserFromId(userid.toLong()))
+                    checkUnseenReminderNotification(it, userRepository.selectUserFromId(userid.toLong()))
                 }
             }
         }
     }
 
-    private fun checkReminderNotification(reminder: Reminder, username: String) {
-        val workManager = WorkManager.getInstance(Graph.appContext)
-        val notificationWorker = OneTimeWorkRequestBuilder<ReminderNotificationWorker>() //we use the doWork method on ReminderNotificationWorker class to do our work
-        val data = Data.Builder() //for parameter pass at ReminderNotificationWorker class constructor
-        data.putString("Date", reminder.reminder_time)
-        notificationWorker.setInputData(data.build()) //pass the parameters
-        val notificationWorkerbuilded = notificationWorker.build()
-        workManager.enqueue(notificationWorkerbuilded)
-
-        //Monitoring for state of work
-        workManager.getWorkInfoByIdLiveData(notificationWorkerbuilded.id)
-            .observeForever { workInfo ->
-                if (workInfo.state == WorkInfo.State.SUCCEEDED) {
-                    createReminderDueNotification(reminder, username)
-                    //after notification shows up we update this reminder with seen = true at database so it can appear in the view model
-                    viewModelScope.launch {
-                        reminderRepository.updateReminder(
-                        Reminder(
+    private fun checkUnseenReminderNotification(reminder: Reminder, username: String) {
+        val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm")
+        val today:Long = Date().time
+        val reminderdate = formatter.parse(reminder.reminder_time).time //From string to Date as long
+        val interval = reminderdate - today
+        if(interval < 0){ //if this unseen reminder has already pass, make the notification and update it as seen
+            createReminderDueNotification(reminder, username)
+            viewModelScope.launch {
+                reminderRepository.updateReminder(
+                    Reminder(
                         reminder.id,
                         reminder.message,
                         reminder.location_x,
@@ -69,11 +75,41 @@ class ReminderListViewModel(private val reminder_id:String,
                         reminder.creation_time,
                         reminder.creator_id,
                         true))
+            }
+            navController.navigate("main/$username/${reminder.creator_id}") //navigate again to activity to see the results
+            return
+        }
+        val workManager = WorkManager.getInstance(Graph.appContext)
+        val notificationWorker = OneTimeWorkRequestBuilder<ReminderNotificationWorker>() //we use the doWork method on ReminderNotificationWorker class to do our work
+            .setInitialDelay(interval,TimeUnit.MILLISECONDS) //wait for the interval to make the notification
+
+        val notificationWorkerbuilded = notificationWorker.build()
+        workManager.enqueue(notificationWorkerbuilded)
+
+        //Monitoring for state of work
+        workManager.getWorkInfoByIdLiveData(notificationWorkerbuilded.id)
+            .observeForever { workInfo ->
+                if (workInfo.state == WorkInfo.State.SUCCEEDED)
+                {
+                    createReminderDueNotification(reminder, username)
+                    //after notification shows up we update this reminder with seen = true at database so it can appear in the view model
+                    viewModelScope.launch {
+                        reminderRepository.updateReminder(
+                            Reminder(
+                                reminder.id,
+                                reminder.message,
+                                reminder.location_x,
+                                reminder.location_y,
+                                reminder.reminder_time,
+                                reminder.creation_time,
+                                reminder.creator_id,
+                                true))
                     }
+                    navController.navigate("main/$username/${reminder.creator_id}") //navigate again to activity to see the results
                 }
+            }
         }
     }
-}
 
 private fun createNotificationChannel(context: Context) {
     // Create the NotificationChannel, but only on API 26+ because
@@ -91,7 +127,7 @@ private fun createNotificationChannel(context: Context) {
     }
 }
 
-private fun createReminderDueNotification(reminder: Reminder, username: String){
+fun createReminderDueNotification(reminder: Reminder, username: String){
     val notificationId = 1
     val builder = NotificationCompat.Builder(Graph.appContext, "CHANNEL_ID")
         .setSmallIcon(R.drawable.ic_launcher_background)
@@ -105,6 +141,6 @@ private fun createReminderDueNotification(reminder: Reminder, username: String){
     }
 }
 data class ReminderViewState(
-    val seenreminders: List<Reminder> = emptyList(),
-    val reminder: Reminder? = null
+    var showreminders: List<Reminder> = emptyList(),
+    val editreminder: Reminder? = null
 )
