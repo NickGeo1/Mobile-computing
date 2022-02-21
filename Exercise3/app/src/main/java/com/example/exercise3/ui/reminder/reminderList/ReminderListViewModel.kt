@@ -42,7 +42,7 @@ class ReminderListViewModel(private val reminder_id:String,
     init {
         createNotificationChannel(context = Graph.appContext) //create the notification channel
                                 //In the case of reminder list//
-        //Initialy, we provide a list of the seen reminders in the viewmodel state
+        //Initially, we provide a list of the seen reminders in the viewmodel state
         //We make a work for each unseen reminder and check if its time for notification
 
                                 //In the case of reminder edit//

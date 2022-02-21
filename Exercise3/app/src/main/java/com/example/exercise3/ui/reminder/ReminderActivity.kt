@@ -9,13 +9,9 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.example.exercise3.ui.defButton
 import com.example.exercise3.ui.defTopbarTextandIconbutton
 import com.example.exercise3.ui.reminder.reminderList.ReminderListElement
 import com.example.exercise3.ui.theme.bgyellow

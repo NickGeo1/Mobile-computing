@@ -20,7 +20,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.exercise3.UserInitialisaton
 import com.example.exercise3.entities.Reminder
-import com.example.exercise3.repository.UserRepository
 import com.example.exercise3.ui.defButton
 import com.example.exercise3.util.viewModelProviderFactoryOf
 import kotlinx.coroutines.launch
@@ -38,17 +37,17 @@ fun ReminderListElement(username:String, userid:String, nav:NavController)
         factory = viewModelProviderFactoryOf { ReminderListViewModel("0",userid,nav) }
     )
     val viewState by viewModel.state.collectAsState()
-    var showlist: List<Reminder> by remember {  mutableStateOf(listOf()) }
+    val showlist: MutableState<List<Reminder>> = rememberSaveable {mutableStateOf(listOf())}
     val coroutineScope = rememberCoroutineScope()
 
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         ReminderList(
-            list = if(showlist.isEmpty()){
+            list = if(showlist.value.isEmpty()){
                 //if we assign this to showlist, the first time is null.
                 //If we change the viewState.showreminders at every button press, sometimes doesnt work
                 viewState.showreminders
             }else{
-                 showlist
+                 showlist.value
                  },
             nav = nav,
             username = username
@@ -65,7 +64,7 @@ fun ReminderListElement(username:String, userid:String, nav:NavController)
                 show_all.value = false
             }
             coroutineScope.launch {
-                showlist = viewModel.changeShow(show_all.value) //we return the new results at showlist that changes the lazycolumn
+                showlist.value = viewModel.changeShow(show_all.value) //we return the new results at showlist that changes the lazycolumn
             }
         }, text = show_btn_text.value)
     }
@@ -113,6 +112,7 @@ private fun ReminderList(
             )
         }
     }
+
     if(dialog.value){ //show all reminder details
         AlertDialog(
             onDismissRequest = { dialog.value = false },
