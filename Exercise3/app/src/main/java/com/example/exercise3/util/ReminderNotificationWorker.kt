@@ -13,14 +13,13 @@ class ReminderNotificationWorker(
 
     override fun doWork(): Result {
 
-//        return try{
-//        println("Interval completed, Work returning success")
-//            Result.success()
-//        }catch(e:Exception){
-//            Result.failure()
-//        }
+        return try{
+        println("Interval completed, Work returning success")
+            Result.success()
+        }catch(e:Exception){
+            Result.failure()
+        }
 
-        return Result.success()
     }
 
 }
