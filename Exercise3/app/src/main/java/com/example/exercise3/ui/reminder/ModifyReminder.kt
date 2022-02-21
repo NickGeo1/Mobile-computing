@@ -61,14 +61,14 @@ fun ModifyReminder(nav: NavController,
         else ->rememberSaveable { mutableStateOf(reminder.location_y.toString()) }
     }
 
-    val reminder_id = when(reminder){
-        null->rememberSaveable { mutableStateOf(0) }
-        else ->rememberSaveable { mutableStateOf(reminder.id) }
-    }
-
     val reminder_date = when(reminder){
         null->rememberSaveable { mutableStateOf("") }
         else ->rememberSaveable { mutableStateOf(reminder.reminder_time) }
+    }
+
+    val reminder_notification = when(reminder){
+        null->rememberSaveable { mutableStateOf(true) }
+        else ->rememberSaveable { mutableStateOf(reminder.notification) }
     }
 
     val context = LocalContext.current //get the current context for the date picker
@@ -189,9 +189,22 @@ fun ModifyReminder(nav: NavController,
 
             Spacer(modifier = Modifier.height(20.dp))
 
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
+                defText(text = "Receive notification: ", color = Color.Black)
+
+                Spacer(modifier = Modifier.width(20.dp))
+
+                Checkbox(checked = reminder_notification.value, onCheckedChange = {reminder_notification.value = !reminder_notification.value})
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
             defButton(onclick =
             {
-                if(reminder==null){ //if reminder object is null we insert a new reminder
+                if(isPastDate(reminder_date.value)){
+                    nav.navigate("fail/You cant add a notification with a past date/modify_reminder,$username,$userid,$reminder_id")
+                }
+                else if(reminder==null){ //if reminder object is null we insert a new reminder
                     UserInitialisaton.addReminder(username,  Reminder(
                         message=reminder_message.value,
                         location_x = reminder_locationx.value.toInt(),
@@ -199,7 +212,8 @@ fun ModifyReminder(nav: NavController,
                         creator_id = userid.toLong(),
                         creation_time = Date().time,
                         reminder_time = reminder_date.value,
-                        reminder_seen = false), navController = nav)
+                        reminder_seen = false,
+                        notification = reminder_notification.value), navController = nav)
                 }else{ //if reminder object is not null we updating the current values
                     UserInitialisaton.updateReminder(username, Reminder(id = reminder.id,
                         message = reminder_message.value,
@@ -208,8 +222,8 @@ fun ModifyReminder(nav: NavController,
                         creator_id = userid.toLong(),
                         creation_time = Date().time,
                         reminder_time = reminder_date.value,
-                        reminder_seen = isPastDate(reminder_date.value)
-                    ), nav)
+                        reminder_seen = false,
+                        notification = reminder_notification.value), navController = nav)
 
                 }
             } , text = "Done")
@@ -223,7 +237,7 @@ fun isPastDate(newremtime:String):Boolean{
     val currenttime = formatter.parse(formatter.format(Date()))
     val comparer = newremindertime.compareTo(currenttime)
     return when{
-        comparer <= 0 -> true
+        comparer < 0 -> true
         else -> false
     }
 }

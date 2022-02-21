@@ -9,7 +9,7 @@ import com.example.exercise3.entities.User
 
 @Database(
     entities = [User::class, Reminder::class],
-    version = 7,
+    version = 8,
     exportSchema = false
 )
 abstract class ReminderDatabase : RoomDatabase() {

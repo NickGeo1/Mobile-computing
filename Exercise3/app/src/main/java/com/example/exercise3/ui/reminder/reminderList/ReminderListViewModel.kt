@@ -63,7 +63,9 @@ class ReminderListViewModel(private val reminder_id:String,
         val reminderdate = formatter.parse(reminder.reminder_time).time //From string to Date as long
         val interval = reminderdate - today
         if(interval < 0){ //if this unseen reminder has already pass, make the notification and update it as seen
-            createReminderDueNotification(reminder, username)
+            if(reminder.notification){
+                createReminderDueNotification(reminder, username)
+            }
             viewModelScope.launch {
                 reminderRepository.updateReminder(
                     Reminder(
@@ -74,7 +76,8 @@ class ReminderListViewModel(private val reminder_id:String,
                         reminder.reminder_time,
                         reminder.creation_time,
                         reminder.creator_id,
-                        true))
+                        true,
+                        reminder.notification))
             }
             navController.navigate("main/$username/${reminder.creator_id}") //navigate again to activity to see the results
             return
@@ -91,7 +94,9 @@ class ReminderListViewModel(private val reminder_id:String,
             .observeForever { workInfo ->
                 if (workInfo.state == WorkInfo.State.SUCCEEDED)
                 {
-                    createReminderDueNotification(reminder, username)
+                    if(reminder.notification){
+                        createReminderDueNotification(reminder, username)
+                    }
                     //after notification shows up we update this reminder with seen = true at database so it can appear in the view model
                     viewModelScope.launch {
                         reminderRepository.updateReminder(
@@ -103,7 +108,8 @@ class ReminderListViewModel(private val reminder_id:String,
                                 reminder.reminder_time,
                                 reminder.creation_time,
                                 reminder.creator_id,
-                                true))
+                                true,
+                                reminder.notification))
                     }
                     navController.navigate("main/$username/${reminder.creator_id}") //navigate again to activity to see the results
                 }

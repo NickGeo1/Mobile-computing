@@ -86,6 +86,7 @@ private fun ReminderList(
     val creation_time: MutableState<String> = rememberSaveable { mutableStateOf("") }
     val creator_id: MutableState<Long> = rememberSaveable { mutableStateOf(0) }
     val reminder_seen = rememberSaveable { mutableStateOf(false) }
+    val reminder_notification = rememberSaveable { mutableStateOf(false)}
 
     LazyColumn(
         contentPadding = PaddingValues(0.dp),
@@ -103,7 +104,7 @@ private fun ReminderList(
                     creation_time.value = item.creation_time.toDateString()
                     creator_id.value = item.creator_id
                     reminder_seen.value = item.reminder_seen
-
+                    reminder_notification.value = item.notification
                 },
                 modifier = Modifier.fillParentMaxWidth(),
                 nav = nav,
@@ -123,7 +124,8 @@ private fun ReminderList(
             text = { Text(text = "Message: ${message.value}\n\n" +
                                  "Location: (${loc_x.value},${loc_y.value})\n\n" +
                                  "Reminder/notification time: ${rem_time.value}\n\n" +
-                                 "Created at: ${creation_time.value}")
+                                 "Created at: ${creation_time.value}\n\n" +
+                                 "Notification enabled: ${if(reminder_notification.value){"true"} else {"false"}}")
             }
         )
     }

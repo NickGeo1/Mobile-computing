@@ -33,7 +33,6 @@ fun ApplicationActivities(appState: ApplicationState = rememberAppState())
                 navigateto.value = backstackentry.arguments?.getString("back")?:""
                 navigateto.value = navigateto.value.replace(",","/")
             }
-            println(navigateto)
              Fail(navController = appState.navController,
             backstackentry.arguments?.getString("text")?:"")
             {appState.navController.navigate(navigateto.value) }
