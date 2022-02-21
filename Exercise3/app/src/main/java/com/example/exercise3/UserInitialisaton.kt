@@ -41,7 +41,7 @@ object UserInitialisaton : ViewModel() {
                 reminderRepository.updateReminder(reminder)
                 navController.navigate("main/${username}/${reminder.creator_id}")
             }else{
-                navController.navigate("fail/There is already a reminder like that/modify_reminder,${username},${reminder.creator_id},${reminder.id}")
+                navController.navigate("fail/There is already a reminder like that")
             }
         }
     }
@@ -53,7 +53,7 @@ object UserInitialisaton : ViewModel() {
                  reminderRepository.insertReminder(reminder)
                  navController.navigate("main/${username}/${reminder.creator_id}")
             }else{
-                navController.navigate("fail/There is already a reminder like that/modify_reminder,${username},${reminder.creator_id},${reminder.id}")
+                navController.navigate("fail/There is already a reminder like that")
             }
         }
     }
@@ -75,7 +75,7 @@ object UserInitialisaton : ViewModel() {
                 navController.navigate("main/${resultuser.username}/${resultuser.id}")
             }
             else{
-                navController.navigate("fail/Login failed, please check your credentials/login")
+                navController.navigate("fail/Login failed, please check your credentials")
             }
         }
     }
@@ -94,7 +94,7 @@ object UserInitialisaton : ViewModel() {
                 userRepository.updateUser(newuser)
                 navController.navigate("profile/$newusername/$userid")
             }else{
-                navController.navigate("fail/The username $newusername already exists/${"profile,$oldusername,$userid"}")
+                navController.navigate("fail/The username $newusername already exists")
             }
         }
     }

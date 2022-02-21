@@ -202,7 +202,7 @@ fun ModifyReminder(nav: NavController,
             defButton(onclick =
             {
                 if(isPastDate(reminder_date.value)){
-                    nav.navigate("fail/You cant add a notification with a past date/modify_reminder,$username,$userid,$reminder_id")
+                    nav.navigate("fail/You cant add a notification with a past date")
                 }
                 else if(reminder==null){ //if reminder object is null we insert a new reminder
                     UserInitialisaton.addReminder(username,  Reminder(

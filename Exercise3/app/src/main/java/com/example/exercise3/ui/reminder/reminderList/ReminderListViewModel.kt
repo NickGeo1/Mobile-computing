@@ -86,9 +86,10 @@ class ReminderListViewModel(private val reminder_id:String,
         val notificationWorker = OneTimeWorkRequestBuilder<ReminderNotificationWorker>() //we use the doWork method on ReminderNotificationWorker class to do our work
             .setInitialDelay(interval,TimeUnit.MILLISECONDS) //wait for the interval to make the notification
 
+        println(interval.toString())
         val notificationWorkerbuilded = notificationWorker.build()
         workManager.enqueue(notificationWorkerbuilded)
-
+        println(reminder.message)
         //Monitoring for state of work
         workManager.getWorkInfoByIdLiveData(notificationWorkerbuilded.id)
             .observeForever { workInfo ->

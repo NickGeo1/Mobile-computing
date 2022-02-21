@@ -1,5 +1,6 @@
 package com.example.exercise3
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -20,37 +21,37 @@ fun ApplicationActivities(appState: ApplicationState = rememberAppState())
     ){
         composable(route = "login") //all the windows-destinations are here as composables
         {
+            BackHandler(true) { //do nothing when we press back at login page
+
+            }
             Login(navController = appState.navController)
         }
-        composable(route = "fail/{text}/{back}") //route for fail to login/fail to change username destination
+        composable(route = "fail/{text}") //route for fail messages activity
         {
-            //Arguments: the text to display and either login route or profile route with old name as parameter
+            //Argument: the text to display
             backstackentry ->
-            val navigateto = rememberSaveable{ mutableStateOf("")}
-            if(backstackentry.arguments?.getString("back").equals("login")){
-                navigateto.value = "login"
-            }else{
-                navigateto.value = backstackentry.arguments?.getString("back")?:""
-                navigateto.value = navigateto.value.replace(",","/")
-            }
              Fail(navController = appState.navController,
-            backstackentry.arguments?.getString("text")?:"")
-            {appState.navController.navigate(navigateto.value) }
+            backstackentry.arguments?.getString("text")?:"", appState::navigateBack)
         }
-        composable(route = "main/{username}/{userid}") //route for main destination. Argument: username
+        composable(route = "main/{username}/{userid}") //route for main destination.
         {
             backstackentry -> ReminderActivity(appState.navController,
             backstackentry.arguments?.getString("username")?:"",
-
             backstackentry.arguments?.getString("userid")?:"")
+
+            //We navigate multiple times at main activity during list update so we do this
+            //in order to go back with only one back press
+            BackHandler(true) {
+                appState.navController.navigate("login")
+            }
         }
-        composable(route="profile/{username}/{userid}") //route for profile view destination. Argument: username
+        composable(route="profile/{username}/{userid}") //route for profile view destination.
         {
             backstackentry -> ProfileActivity(appState.navController,
             backstackentry.arguments?.getString("username")?:"",
             backstackentry.arguments?.getString("userid")?:"")
         }
-        composable(route = "modify_reminder/{username}/{userid}/{reminder_id}")
+        composable(route = "modify_reminder/{username}/{userid}/{reminder_id}") //route for reminder modification
         {
                 backstackentry -> ModifyReminder(appState.navController,
             backstackentry.arguments?.getString("username")?:"",
