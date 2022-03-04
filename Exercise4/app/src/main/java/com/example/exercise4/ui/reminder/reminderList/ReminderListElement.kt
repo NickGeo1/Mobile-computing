@@ -18,6 +18,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.exercise4.Graph
 import com.example.exercise4.UserInitialisaton
 import com.example.exercise4.entities.Reminder
 import com.example.exercise4.ui.defButton
@@ -50,7 +51,11 @@ fun ReminderListElement(username:String, userid:String, nav:NavController)
                  showlist.value
                  },
             nav = nav,
-            username = username
+            username = username,
+            //we pass these two variables all the way down to ReminderListItem() in order to change
+            //showlist.value as soon as we press the delete button
+            onelementdelete = {showlist.value = it},
+            showall = show_all.value
         )
         Spacer(Modifier.height(30.dp))
         defButton(onclick = {
@@ -75,7 +80,9 @@ fun ReminderListElement(username:String, userid:String, nav:NavController)
 private fun ReminderList(
     list: List<Reminder>,
     nav: NavController,
-    username:String
+    username:String,
+    onelementdelete: (List<Reminder>) -> Unit,
+    showall: Boolean
 ) {
     val dialog = rememberSaveable { mutableStateOf(false) }
     val message = rememberSaveable { mutableStateOf("") }
@@ -109,6 +116,8 @@ private fun ReminderList(
                 nav = nav,
                 userid = item.creator_id.toString(),
                 username = username,
+                onelementdelete,
+                showall
             )
         }
     }
@@ -139,7 +148,11 @@ private fun ReminderListItem(
     nav: NavController,
     userid: String,
     username: String,
+    onelementdelete: (List<Reminder>) -> Unit,
+    showall: Boolean
 ) {
+    val coroutineScope = rememberCoroutineScope()
+
     ConstraintLayout(modifier = modifier.clickable { onClick() }) {
         val (divider, id, title, row, date) = createRefs()
         Divider(
@@ -232,7 +245,11 @@ private fun ReminderListItem(
 
             IconButton( // icon for delete
                 onClick = { UserInitialisaton.deleteReminder(reminder)
-                    nav.navigate("main/$username/$userid")}, //we renavigate after the delete so we can see the results
+                    coroutineScope.launch {
+                        onelementdelete(Graph.reminderRepository.selectuserReminders(userid.toLong(), showall)) //set showlist.value equal to the new list after deletion
+                    }
+                          },
+                    //nav.navigate("main/$username/$userid")}, //we renavigate after the delete so we can see the results
                 modifier = Modifier
                     .size(50.dp)
                     .padding(6.dp)

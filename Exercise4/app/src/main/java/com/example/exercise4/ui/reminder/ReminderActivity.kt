@@ -10,8 +10,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.work.WorkManager
+import com.example.exercise4.Graph
 import com.example.exercise4.ui.defTopbarTextandIconbutton
 import com.example.exercise4.ui.reminder.reminderList.ReminderListElement
 import com.example.exercise4.ui.theme.bgyellow
@@ -20,12 +23,15 @@ import com.google.accompanist.insets.systemBarsPadding
 
 //Our main activity. Here we are going to show,add,edit and delete our reminders
 
+
 @Composable
 fun ReminderActivity(
     navController: NavHostController,
     username: String,
     userid: String,
 ) {
+    Graph.currentactivity = "Reminder"
+
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
@@ -62,7 +68,10 @@ private fun ReminderAppBar(
     TopAppBar(
         title = {
             defTopbarTextandIconbutton(
-                onclick = {nav.navigate("login")},
+                onclick = {
+                    //we stop workers that wait for notifications if we logout
+                    WorkManager.getInstance(Graph.appContext).cancelAllWork()
+                    nav.navigate("login")},
                 iconcntndesc = "logout_btn",
                 text = "Logout"
             )

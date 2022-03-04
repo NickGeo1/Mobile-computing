@@ -89,7 +89,7 @@ object UserInitialisaton : ViewModel() {
                 val olduser = userRepository.selectUser(oldusername)
                 val newuser = User(id= olduser.id, username = newusername, password = olduser.password, img = olduser.img)
                 userRepository.updateUser(newuser)
-                navController.navigate("profile/$newusername/$userid")
+                navController.navigate("profile/$newusername/$userid") //navigate again to the same activity in order to update the username parameter
             }else{
                 navController.navigate("fail/The username $newusername already exists")
             }

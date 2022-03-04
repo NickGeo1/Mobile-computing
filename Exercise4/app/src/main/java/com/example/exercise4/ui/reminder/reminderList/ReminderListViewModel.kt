@@ -78,7 +78,10 @@ class ReminderListViewModel(private val reminder_id:String,
                         true,
                         reminder.notification))
             }
-            navController.navigate("main/$username/${reminder.creator_id}") //navigate again to activity to see the results
+            //if we are currently viewing reminder activity, navigate again to this activity to see the updated list
+            if(Graph.currentactivity.equals("Reminder")){
+                navController.navigate("main/$username/${reminder.creator_id}") //navigate again to activity to see the results
+            }
             return
         }
         val workManager = WorkManager.getInstance(Graph.appContext)
@@ -109,8 +112,12 @@ class ReminderListViewModel(private val reminder_id:String,
                                 reminder.creator_id,
                                 true,
                                 reminder.notification))
+
                     }
-                    navController.navigate("main/$username/${reminder.creator_id}") //navigate again to activity to see the results
+                    //if we are currently viewing reminder activity, navigate again to this activity to see the updated list
+                    if(Graph.currentactivity.equals("Reminder")){
+                        navController.navigate("main/$username/${reminder.creator_id}")
+                    }
                 }
             }
         }

@@ -2,6 +2,7 @@ package com.example.exercise4.ui.reminder
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
@@ -15,6 +16,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.exercise4.Graph
 import com.example.exercise4.UserInitialisaton
 import com.example.exercise4.entities.Reminder
 import com.example.exercise4.ui.defButton
@@ -40,6 +42,7 @@ fun ModifyReminder(nav: NavController,
                    )
                 )
 {
+    Graph.currentactivity = "Modify"
     //if the reminder object is null, that means we provided the 0 reminder_id(query couldn't find the reminder)
     //This is the case of creation of new reminder. In the case of editing, we provide the chosen reminder's
     //id to this context so the reminder object is not null and we can fill the textboxes

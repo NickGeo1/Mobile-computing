@@ -7,7 +7,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
+import com.example.exercise4.Graph
 import com.example.exercise4.ui.defText
 import com.example.exercise4.ui.defTopbarTextandIconbutton
 import com.example.exercise4.ui.theme.bgyellow
@@ -18,6 +20,7 @@ import com.google.accompanist.insets.systemBarsPadding
 
 @Composable
 fun Fail(navController: NavController, text: String, onbackpress: () -> Unit){
+    Graph.currentactivity = "Fail"
     Surface(modifier = Modifier
         .fillMaxSize()
         .systemBarsPadding(), color = bgyellow){

@@ -14,6 +14,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.exercise4.Graph
 import com.example.exercise4.rememberAppState
 import com.example.exercise4.ui.defButton
 import com.example.exercise4.ui.defTopbarTextandIconbutton
@@ -27,6 +28,7 @@ import com.example.exercise4.UserInitialisaton
 
 @Composable
 fun ProfileActivity(nav: NavHostController, username: String, userid: String) {
+    Graph.currentactivity = "Profile"
     Surface(modifier = Modifier.fillMaxSize().systemBarsPadding(), color = bgyellow) {
         val txtusername = rememberSaveable { mutableStateOf(username) }
 
