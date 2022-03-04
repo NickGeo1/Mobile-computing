@@ -49,6 +49,11 @@ fun ApplicationActivities(appState: ApplicationState = rememberAppState())
             backstackentry -> ProfileActivity(appState.navController,
             backstackentry.arguments?.getString("username")?:"",
             backstackentry.arguments?.getString("userid")?:"")
+            //we navigate multiple times to profile activity during name change so we want to navigate
+            //back to main activity with one backpress
+            BackHandler(true) {
+                appState.navController.navigate("main/${backstackentry.arguments?.getString("username")?:""}/${backstackentry.arguments?.getString("userid")?:""}")
+            }
         }
         composable(route = "modify_reminder/{username}/{userid}/{reminder_id}") //route for reminder modification
         {
