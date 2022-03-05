@@ -54,14 +54,14 @@ fun ModifyReminder(nav: NavController,
         else ->rememberSaveable { mutableStateOf(reminder.message) }
     }
 
-    val reminder_locationx = when(reminder){
+    val reminder_latitude = when(reminder){
         null->rememberSaveable { mutableStateOf("") }
-        else ->rememberSaveable { mutableStateOf(reminder.location_x.toString()) }
+        else ->rememberSaveable{ mutableStateOf(reminder.latitude) }
     }
 
-    val reminder_locationy = when(reminder){
+    val reminder_longitude = when(reminder){
         null->rememberSaveable { mutableStateOf("") }
-        else ->rememberSaveable { mutableStateOf(reminder.location_y.toString()) }
+        else ->rememberSaveable{ mutableStateOf(reminder.longitude) }
     }
 
     val reminder_date = when(reminder){
@@ -70,7 +70,7 @@ fun ModifyReminder(nav: NavController,
     }
 
     val reminder_notification = when(reminder){
-        null->rememberSaveable { mutableStateOf(true) }
+        null->rememberSaveable { mutableStateOf(false) }
         else ->rememberSaveable { mutableStateOf(reminder.notification) }
     }
 
@@ -91,11 +91,11 @@ fun ModifyReminder(nav: NavController,
         { _, year: Int, month: Int, dayOfMonth: Int ->
             TimePickerDialog(context, { _, hour: Int, minute: Int ->
                 val correcthour = when{
-                    hour < 10 -> "0"+hour.toString()
+                    hour < 10 -> "0$hour"
                     else -> hour
                 }
                 val correctminute = when{
-                    minute < 10 -> "0"+minute.toString()
+                    minute < 10 -> "0$minute"
                     else -> minute
                 }
                 reminder_date.value = "$dayOfMonth/${month+1}/$year $correcthour:$correctminute" //we add 1 to month because months begin from 0
@@ -147,7 +147,7 @@ fun ModifyReminder(nav: NavController,
 
             TextField( //textbox for reminder date
                 value = reminder_date.value,
-                onValueChange = {},
+                onValueChange ={},
                 readOnly = true,
                 label = { Text("Your reminder date") },
                 modifier = Modifier.fillMaxWidth(),
@@ -166,8 +166,8 @@ fun ModifyReminder(nav: NavController,
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center)
             {
                 TextField( //textbox for location x
-                    value = reminder_locationx.value,
-                    onValueChange = { x -> reminder_locationx.value = x },
+                    value = reminder_latitude.value,
+                    onValueChange = { x -> reminder_latitude.value = x },
                     label = { Text(text = "Longitude")},
                     modifier = Modifier.width(110.dp),
                     keyboardOptions = KeyboardOptions(
@@ -179,8 +179,8 @@ fun ModifyReminder(nav: NavController,
                 Spacer(modifier = Modifier.width(20.dp))
 
                 TextField( //textbox for location y
-                    value = reminder_locationy.value,
-                    onValueChange = { y -> reminder_locationy.value = y },
+                    value = reminder_longitude.value,
+                    onValueChange = { y -> reminder_longitude.value = y },
                     label = { Text("Latitude") },
                     modifier = Modifier.width(110.dp),
                     keyboardOptions = KeyboardOptions(
@@ -201,35 +201,56 @@ fun ModifyReminder(nav: NavController,
 
                 Spacer(modifier = Modifier.width(20.dp))
 
-                Checkbox(checked = reminder_notification.value, onCheckedChange = {reminder_notification.value = !reminder_notification.value})
+                Checkbox(checked = reminder_notification.value,
+                        onCheckedChange = {reminder_notification.value = !reminder_notification.value},
+                        enabled = when(reminder_date.value){
+                            "" -> false
+                            else -> true
+                        }) //we enable the notification choice only if there is a time set for it
             }
 
             Spacer(modifier = Modifier.height(20.dp))
 
             defButton(onclick =
             {
-                if(isPastDate(reminder_date.value)){
+                if(reminder_date.value!="" && isPastDate(reminder_date.value))
+                {
                     nav.navigate("fail/You cant add a notification with a past date")
                 }
                 else if(reminder==null){ //if reminder object is null we insert a new reminder
                     UserInitialisaton.addReminder(username,  Reminder(
                         message=reminder_message.value,
-                        location_x = reminder_locationx.value.toInt(),
-                        location_y = reminder_locationx.value.toInt(),
+                        latitude = reminder_latitude.value,
+                        longitude = reminder_longitude.value,
                         creator_id = userid.toLong(),
                         creation_time = Date().time,
                         reminder_time = reminder_date.value,
-                        reminder_seen = false,
-                        notification = reminder_notification.value), navController = nav)
+                        reminder_seen = when(reminder_date.value){
+                            "" -> true
+                            else -> false
+                        }, //if time is empty this is true. We consider reminders without time set as seen
+                        notification = reminder_notification.value),
+                        navController = nav)
                 }else{ //if reminder object is not null we updating the current values
                     UserInitialisaton.updateReminder(username, Reminder(id = reminder.id,
                         message = reminder_message.value,
-                        location_y = reminder_locationy.value.toInt(),
-                        location_x = reminder_locationx.value.toInt(),
+                        longitude = when
+                        {
+                            reminder_longitude.value != "" -> reminder_longitude.value
+                            else -> ""
+                        },
+                        latitude = when
+                        {
+                            reminder_latitude.value != "" -> reminder_latitude.value
+                            else -> ""
+                        },
                         creator_id = userid.toLong(),
                         creation_time = Date().time,
                         reminder_time = reminder_date.value,
-                        reminder_seen = false,
+                        reminder_seen = when(reminder_date.value){
+                            "" -> true
+                            else -> false
+                        },
                         notification = reminder_notification.value), navController = nav)
 
                 }

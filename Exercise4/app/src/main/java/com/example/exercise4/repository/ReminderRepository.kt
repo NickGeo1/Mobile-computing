@@ -10,7 +10,7 @@ class ReminderRepository(private val reminderDao: ReminderDao) {
 
     suspend fun insertReminder(reminder: Reminder) = reminderDao.insertReminder(reminder)
 
-    suspend fun selectReminder(reminder: Reminder): Reminder? = reminderDao.selectReminder(reminder.creator_id, reminder.reminder_time, reminder.location_x, reminder.location_y, reminder.message)
+    suspend fun selectReminder(reminder: Reminder): Reminder? = reminderDao.selectReminder(reminder.creator_id, reminder.reminder_time, reminder.latitude, reminder.longitude, reminder.message)
 
     fun selectuserUnseenReminders(uid: Long): Flow<List<Reminder>>{
         return reminderDao.selectuserUnseenReminders(uid)

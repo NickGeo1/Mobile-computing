@@ -70,8 +70,8 @@ class ReminderListViewModel(private val reminder_id:String,
                     Reminder(
                         reminder.id,
                         reminder.message,
-                        reminder.location_x,
-                        reminder.location_y,
+                        reminder.latitude,
+                        reminder.longitude,
                         reminder.reminder_time,
                         reminder.creation_time,
                         reminder.creator_id,
@@ -105,8 +105,8 @@ class ReminderListViewModel(private val reminder_id:String,
                             Reminder(
                                 reminder.id,
                                 reminder.message,
-                                reminder.location_x,
-                                reminder.location_y,
+                                reminder.latitude,
+                                reminder.longitude,
                                 reminder.reminder_time,
                                 reminder.creation_time,
                                 reminder.creator_id,
@@ -144,7 +144,7 @@ fun createReminderDueNotification(reminder: Reminder, username: String){
     val builder = NotificationCompat.Builder(Graph.appContext, "CHANNEL_ID")
         .setSmallIcon(R.drawable.ic_launcher_background)
         .setContentTitle("Reminder occurring for user $username")
-        .setStyle(NotificationCompat.BigTextStyle().bigText("Reminder ${reminder.message} is occurring now at location (${reminder.location_x},${reminder.location_y})"))
+        .setStyle(NotificationCompat.BigTextStyle().bigText("Reminder ${reminder.message} is occurring now at location (${reminder.longitude},${reminder.latitude})"))
         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
     with(NotificationManagerCompat.from(Graph.appContext)) {

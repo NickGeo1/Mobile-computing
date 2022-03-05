@@ -19,7 +19,7 @@ abstract class ReminderDao {
     abstract suspend fun selectReminderfromid(id: Long): Reminder //When we want to select a reminder by id
 
     @Query(value = "SELECT * FROM reminders WHERE creator_id=:uid and reminder_time = :time and location_x = :x and location_y = :y and message = :m")
-    abstract suspend fun selectReminder(uid:Long, time: String, x:Int, y:Int, m:String): Reminder? //When we want to check if theres already a reminder with the same message location and date
+    abstract suspend fun selectReminder(uid:Long, time: String, x:String, y:String, m:String): Reminder? //When we want to check if theres already a reminder with the same message location and date
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun insertReminder(entity: Reminder): Long //For reminder insert

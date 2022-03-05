@@ -4,7 +4,7 @@ plugins {
     id 'kotlin-kapt'
     id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
 }
-
+apply plugin: 'org.jetbrains.kotlin.android.extensions'
 android {
     compileSdk 32
 
@@ -18,6 +18,10 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary true
+        }
+
+        androidExtensions {
+            experimental = true
         }
     }
 

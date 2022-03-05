@@ -86,10 +86,10 @@ private fun ReminderList(
 ) {
     val dialog = rememberSaveable { mutableStateOf(false) }
     val message = rememberSaveable { mutableStateOf("") }
-    val loc_x = rememberSaveable { mutableStateOf(0) }
-    val loc_y = rememberSaveable { mutableStateOf(0) }
+    val longitude = rememberSaveable { mutableStateOf("") }
+    val latitude = rememberSaveable { mutableStateOf("") }
     val rem_time = rememberSaveable { mutableStateOf("") }
-    val creation_time: MutableState<String> = rememberSaveable { mutableStateOf("") }
+    val creation_time = rememberSaveable { mutableStateOf("") }
     val creator_id: MutableState<Long> = rememberSaveable { mutableStateOf(0) }
     val reminder_seen = rememberSaveable { mutableStateOf(false) }
     val reminder_notification = rememberSaveable { mutableStateOf(false)}
@@ -104,14 +104,27 @@ private fun ReminderList(
                 onClick = {
                     dialog.value = true
                     message.value = item.message
-                    loc_x.value = item.location_x
-                    loc_y.value = item.location_y
-                    rem_time.value = item.reminder_time
+                    latitude.value = when(item.latitude)
+                    {
+                        "" -> "Not set"
+                        else -> item.latitude
+                    }
+
+                    longitude.value = when(item.longitude)
+                    {
+                        "" -> "Not set"
+                        else -> item.longitude
+                    }
+                    rem_time.value = when(item.reminder_time)
+                    {
+                        "" -> "Not set"
+                        else -> item.reminder_time
+                    }
                     creation_time.value = item.creation_time.toDateString()
                     creator_id.value = item.creator_id
                     reminder_seen.value = item.reminder_seen
                     reminder_notification.value = item.notification
-                },
+                    },
                 modifier = Modifier.fillParentMaxWidth(),
                 nav = nav,
                 userid = item.creator_id.toString(),
@@ -131,9 +144,9 @@ private fun ReminderList(
             },
             title = { Text(text = "Your reminder details") },
             text = { Text(text = "Message: ${message.value}\n\n" +
-                                 "Location: (${loc_x.value},${loc_y.value})\n\n" +
+                                 "Latitude,Longitude: ${latitude.value},${longitude.value}\n\n" +
                                  "Reminder/notification time: ${rem_time.value}\n\n" +
-                                 "Created at: ${creation_time.value}\n\n" +
+                                 "Last modified at: ${creation_time.value}\n\n" +
                                  "Notification enabled: ${if(reminder_notification.value){"true"} else {"false"}}")
             }
         )
