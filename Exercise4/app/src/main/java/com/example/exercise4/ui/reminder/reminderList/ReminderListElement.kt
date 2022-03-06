@@ -144,7 +144,8 @@ private fun ReminderList(
             },
             title = { Text(text = "Your reminder details") },
             text = { Text(text = "Message: ${message.value}\n\n" +
-                                 "Latitude,Longitude: ${latitude.value},${longitude.value}\n\n" +
+                                 "Latitude: ${latitude.value}\n\n" +
+                                 "Longitude: ${longitude.value}\n\n" +
                                  "Reminder/notification time: ${rem_time.value}\n\n" +
                                  "Last modified at: ${creation_time.value}\n\n" +
                                  "Notification enabled: ${if(reminder_notification.value){"true"} else {"false"}}")
@@ -216,65 +217,68 @@ private fun ReminderListItem(
 
         // date
         Text(
-            text = "Notification set at: " + reminder.reminder_time,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            style = MaterialTheme.typography.caption,
-            modifier = Modifier.constrainAs(date) {
-                linkTo(
-                    start = parent.start,
-                    end = row.start,
-                    startMargin = 8.dp,
-                    endMargin = 16.dp,
-                    bias = 0f
-                )
-                top.linkTo(id.bottom, 6.dp)
-                bottom.linkTo(parent.bottom, 10.dp)
-            }
-        )
+            text = when(reminder.reminder_time){
+                    "" -> "Time not set"
+                    else -> "Notification set at: ${reminder.reminder_time}"
+                },
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.caption,
+                modifier = Modifier.constrainAs(date) {
+                    linkTo(
+                        start = parent.start,
+                        end = row.start,
+                        startMargin = 8.dp,
+                        endMargin = 16.dp,
+                        bias = 0f
+                    )
+                    top.linkTo(id.bottom, 6.dp)
+                    bottom.linkTo(parent.bottom, 10.dp)
+                }
+                    )
 
-        Row(
-            modifier = Modifier.constrainAs(row) {
-            top.linkTo(parent.top, 10.dp)
-            bottom.linkTo(parent.bottom, 10.dp)
-            end.linkTo(parent.end)
-            }
-        )
-        {
+                    Row(
+                        modifier = Modifier.constrainAs(row) {
+                            top.linkTo(parent.top, 10.dp)
+                            bottom.linkTo(parent.bottom, 10.dp)
+                            end.linkTo(parent.end)
+                        }
+                    )
+                    {
 
-            // icon for edit
-            IconButton(
-                onClick = { nav.navigate(route="modify_reminder/$username/$userid/${reminder.id}") },
-                modifier = Modifier
-                    .size(50.dp)
-                    .padding(6.dp)
-            )
-            {
-                Icon(
-                    imageVector = Icons.Filled.Edit,
-                    contentDescription = "edit_btn"
-                )
-            }
+                        // icon for edit
+                        IconButton(
+                            onClick = { nav.navigate(route="modify_reminder/$username/$userid/${reminder.id}") },
+                            modifier = Modifier
+                                .size(50.dp)
+                                .padding(6.dp)
+                        )
+                        {
+                            Icon(
+                                imageVector = Icons.Filled.Edit,
+                                contentDescription = "edit_btn"
+                            )
+                        }
 
-            IconButton( // icon for delete
-                onClick = { UserInitialisaton.deleteReminder(reminder)
-                    coroutineScope.launch {
-                        onelementdelete(Graph.reminderRepository.selectuserReminders(userid.toLong(), showall)) //set showlist.value equal to the new list after deletion
+                        IconButton( // icon for delete
+                            onClick = { UserInitialisaton.deleteReminder(reminder)
+                                coroutineScope.launch {
+                                    onelementdelete(Graph.reminderRepository.selectuserReminders(userid.toLong(), showall)) //set showlist.value equal to the new list after deletion
+                                }
+                            },
+                            //nav.navigate("main/$username/$userid")}, //we renavigate after the delete so we can see the results
+                            modifier = Modifier
+                                .size(50.dp)
+                                .padding(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Delete,
+                                contentDescription = "delete_btn"
+                            )
+                        }
                     }
-                          },
-                    //nav.navigate("main/$username/$userid")}, //we renavigate after the delete so we can see the results
-                modifier = Modifier
-                    .size(50.dp)
-                    .padding(6.dp)
-                ) {
-                Icon(
-                    imageVector = Icons.Filled.Delete,
-                    contentDescription = "delete_btn"
-                )
             }
-        }
     }
-}
 
 private fun Long.toDateString(): String {
     return SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(Date(this))

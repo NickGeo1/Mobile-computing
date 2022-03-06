@@ -28,6 +28,7 @@ import com.example.exercise4.ui.theme.bgyellow
 import com.example.exercise4.ui.theme.mainorange
 import com.example.exercise4.util.viewModelProviderFactoryOf
 import com.google.accompanist.insets.systemBarsPadding
+import com.google.android.gms.maps.model.LatLng
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -53,6 +54,12 @@ fun ModifyReminder(nav: NavController,
         null->rememberSaveable { mutableStateOf("") }
         else ->rememberSaveable { mutableStateOf(reminder.message) }
     }
+
+    val location = nav //get the location data if any. We get location data from the google map
+        .currentBackStackEntry
+        ?.savedStateHandle
+        ?.getLiveData<LatLng>("location_data")
+        ?.value
 
     val reminder_latitude = when(reminder){
         null->rememberSaveable { mutableStateOf("") }
@@ -103,6 +110,8 @@ fun ModifyReminder(nav: NavController,
         }, firstyear, firstmonth, firstday
     )
 
+
+
     Surface(modifier = Modifier
         .fillMaxSize()
         .systemBarsPadding(), color = bgyellow)
@@ -118,7 +127,7 @@ fun ModifyReminder(nav: NavController,
                 )
             }
 
-            Spacer(modifier = Modifier.height(80.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             defText(text = "Set your reminder details ", color = Color.Black)
         }
@@ -151,9 +160,6 @@ fun ModifyReminder(nav: NavController,
                 readOnly = true,
                 label = { Text("Your reminder date") },
                 modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Text
-                ),
                 shape = Shapes.medium
             )
 
@@ -165,34 +171,49 @@ fun ModifyReminder(nav: NavController,
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center)
             {
-                TextField( //textbox for location x
-                    value = reminder_latitude.value,
-                    onValueChange = { x -> reminder_latitude.value = x },
+                TextField( //textbox for latitude
+                    value = location?.latitude?.toString() ?: reminder_latitude.value,
+                    onValueChange = {},
                     label = { Text(text = "Longitude")},
                     modifier = Modifier.width(110.dp),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number
-                    ),
+                    readOnly = true,
                     shape = Shapes.medium
                 )
 
                 Spacer(modifier = Modifier.width(20.dp))
 
-                TextField( //textbox for location y
-                    value = reminder_longitude.value,
-                    onValueChange = { y -> reminder_longitude.value = y },
+                TextField( //textbox for longitude
+                    value = location?.longitude?.toString() ?: reminder_longitude.value,
+                    onValueChange = {},
                     label = { Text("Latitude") },
                     modifier = Modifier.width(110.dp),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number
-                    ),
+                    readOnly = true,
                     shape = Shapes.medium
                 )
             }
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            defButton(onclick = { nav.navigate("remindermap")}, text = "Choose map location" )
+            Button(
+                onClick =
+                {
+                    val mapnavigate = when (location)
+                    {
+                        null -> "remindermap/${reminder_latitude.value},${reminder_longitude.value}"
+                        else -> "remindermap/${location.latitude},${location.longitude}"
+                    }
+                    Graph.markeradded = false
+                    nav.navigate(mapnavigate)
+                },
+                enabled = true,
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .height(55.dp),
+                shape = Shapes.small,
+                colors = ButtonDefaults.buttonColors(backgroundColor = mainorange)
+            ){
+                defText("Choose map location", Color.Black)
+            }
 
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -203,10 +224,8 @@ fun ModifyReminder(nav: NavController,
 
                 Checkbox(checked = reminder_notification.value,
                         onCheckedChange = {reminder_notification.value = !reminder_notification.value},
-                        enabled = when(reminder_date.value){
-                            "" -> false
-                            else -> true
-                        }) //we enable the notification choice only if there is a time set for it
+                        enabled = reminder_date.value !="" || location != null || reminder_latitude.value != "" && reminder_longitude.value != "")
+                        //we enable the notification choice only if there is a time or a location set for it
             }
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -220,37 +239,25 @@ fun ModifyReminder(nav: NavController,
                 else if(reminder==null){ //if reminder object is null we insert a new reminder
                     UserInitialisaton.addReminder(username,  Reminder(
                         message=reminder_message.value,
-                        latitude = reminder_latitude.value,
-                        longitude = reminder_longitude.value,
+                        latitude = location?.latitude?.toString() ?: reminder_latitude.value,
+                        longitude = location?.longitude?.toString() ?: reminder_longitude.value,
                         creator_id = userid.toLong(),
                         creation_time = Date().time,
                         reminder_time = reminder_date.value,
-                        reminder_seen = when(reminder_date.value){
-                            "" -> true
-                            else -> false
-                        }, //if time is empty this is true. We consider reminders without time set as seen
+                        reminder_seen = reminder_date.value == "" && reminder_latitude.value == "" && reminder_longitude.value == "" && location == null,
+                        //if time and location is empty this is true. We consider reminders without time and location set as seen
                         notification = reminder_notification.value),
                         navController = nav)
                 }else{ //if reminder object is not null we updating the current values
                     UserInitialisaton.updateReminder(username, Reminder(id = reminder.id,
                         message = reminder_message.value,
-                        longitude = when
-                        {
-                            reminder_longitude.value != "" -> reminder_longitude.value
-                            else -> ""
-                        },
-                        latitude = when
-                        {
-                            reminder_latitude.value != "" -> reminder_latitude.value
-                            else -> ""
-                        },
+                        longitude = location?.longitude?.toString() ?: reminder_longitude.value,
+                        latitude = location?.latitude?.toString() ?: reminder_latitude.value,
                         creator_id = userid.toLong(),
                         creation_time = Date().time,
                         reminder_time = reminder_date.value,
-                        reminder_seen = when(reminder_date.value){
-                            "" -> true
-                            else -> false
-                        },
+                        reminder_seen = reminder_date.value == "" && reminder_latitude.value == "" && reminder_longitude.value == "" && location == null
+                        ,
                         notification = reminder_notification.value), navController = nav)
 
                 }

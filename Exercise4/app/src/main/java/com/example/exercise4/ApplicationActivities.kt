@@ -62,9 +62,11 @@ fun ApplicationActivities(appState: ApplicationState = rememberAppState())
             backstackentry.arguments?.getString("userid")?:"",
             backstackentry.arguments?.getString("reminder_id")?:"")
         }
-        composable(route = "remindermap")
+        composable(route = "remindermap/{position}") //route for google map we pass the marker's location if there is already one set
         {
-            ReminderLocationMap(navController = appState.navController)
+            backstackentry->
+            ReminderLocationMap(navController = appState.navController,
+                backstackentry.arguments?.getString("position")?:"")
         }
 
     }
