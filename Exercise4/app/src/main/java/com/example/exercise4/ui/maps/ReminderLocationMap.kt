@@ -1,10 +1,6 @@
 package com.example.exercise4.ui.maps
 
-import android.Manifest
 import android.annotation.SuppressLint
-import android.location.Location
-import android.util.Log
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,14 +11,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.constraintlayout.compose.override
 import androidx.navigation.NavController
 import com.example.exercise4.Graph
 import com.example.exercise4.util.rememberMapViewWithLifecycle
-import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -40,10 +33,20 @@ fun ReminderLocationMap(
 ) {
     val mapView = rememberMapViewWithLifecycle()
     val coroutineScope = rememberCoroutineScope()
-    //val latitude = position.split(",")[0]
     val latitude = rememberSaveable {mutableStateOf(position.split(",")[0])}
     val longitude = rememberSaveable {mutableStateOf(position.split(",")[1])}
 
+    //if we accepted the location permissions, we move the camera to current location if we want to add
+    //a new reminder marker. At this case if we didn't accept location permissions(or app couldn't find our location) we move the camera
+    //to Oulu
+    //At the case we want to change a marker position, we move the camera at this marker
+    val location = when {
+        latitude.value == "" && longitude.value == "" -> LatLng(
+            Graph.currentLocation?.latitude ?: 65.06,
+            Graph.currentLocation?.longitude ?: 25.47
+        )
+        else -> LatLng(latitude.value.toDouble(), longitude.value.toDouble())
+    }
     Column(modifier = Modifier
         .fillMaxSize()
         .background(Color.Black)
@@ -61,18 +64,6 @@ fun ReminderLocationMap(
                 map.isMyLocationEnabled = when(Graph.currentLocation){
                     null -> false
                     else -> true
-                }
-
-                //if we accepted the location permissions, we move the camera to current location if we want to add
-                //a new reminder marker. At this case if we didn't accept location permissions(or app couldn't find our location) we move the camera
-                //to Oulu
-                //At the case we want to change a marker position, we move the camera at this marker
-                val location = when {
-                    latitude.value == "" && longitude.value == "" -> LatLng(
-                        Graph.currentLocation?.latitude ?: 65.06,
-                        Graph.currentLocation?.longitude ?: 25.47
-                    )
-                    else -> LatLng(latitude.value.toDouble(), longitude.value.toDouble())
                 }
 
                 map.moveCamera(

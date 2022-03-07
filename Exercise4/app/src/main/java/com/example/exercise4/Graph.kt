@@ -1,15 +1,11 @@
 package com.example.exercise4
 
 import android.content.Context
-import android.content.ContextWrapper
 import android.location.Location
-import androidx.appcompat.app.AppCompatActivity
 import androidx.room.Room
-import com.example.exercise4.entities.Reminder
 import com.example.exercise4.repository.ReminderRepository
 import com.example.exercise4.repository.UserRepository
 import com.example.exercise4.room.ReminderDatabase
-import com.google.android.gms.location.FusedLocationProviderClient
 import kotlin.properties.Delegates
 
 object Graph {
