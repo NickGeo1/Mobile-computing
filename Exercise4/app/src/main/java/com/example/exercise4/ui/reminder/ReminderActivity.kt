@@ -69,8 +69,9 @@ private fun ReminderAppBar(
         title = {
             defTopbarTextandIconbutton(
                 onclick = {
-                    //we stop workers that wait for notifications if we logout
-                    WorkManager.getInstance(Graph.appContext).cancelAllWork()
+                    //we stop workers that wait for notifications/locations if we logout
+                    //Graph.listWorkmanager.removeObserver
+                    Graph.listWorkmanager.cancelAllWork()
                     nav.navigate("login")},
                 iconcntndesc = "logout_btn",
                 text = "Logout"

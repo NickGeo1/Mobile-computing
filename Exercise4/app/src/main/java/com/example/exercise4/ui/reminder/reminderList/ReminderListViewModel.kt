@@ -3,9 +3,12 @@ package com.example.exercise4.ui.reminder.reminderList
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.location.Location
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
@@ -16,6 +19,8 @@ import com.example.exercise4.repository.ReminderRepository
 import com.example.exercise4.repository.UserRepository
 import com.example.exercise4.util.ReminderNotificationWorker
 import com.example.exercise4.R
+import com.example.exercise4.util.LocationReminderNotificationWorker
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
@@ -57,13 +62,24 @@ class ReminderListViewModel(private val reminder_id:String,
     }
 
     private fun checkUnseenReminderNotification(reminder: Reminder, username: String) {
-        val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm")
-        val today:Long = Date().time
-        val reminderdate = formatter.parse(reminder.reminder_time).time //From string to Date as long
-        val interval = reminderdate - today
-        if(interval < 0){ //if this unseen reminder has already pass, make the notification and update it as seen
+        var interval: Long? = null
+
+        if(reminder.reminder_time != "")
+        {
+            val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm")
+            val todaysdate = Date()
+            val todaysdate_without_minutes = formatter.parse(formatter.format(todaysdate)).time //from date object to string with the desired format and then again to Date
+            val reminderdate = formatter.parse(reminder.reminder_time).time //From string to Date as long
+            interval = reminderdate - todaysdate_without_minutes
+        }
+
+        if(interval != null && interval < 0){ //if this unseen reminder has already pass make the notification and update it as seen
             if(reminder.notification){
-                createReminderDueNotification(reminder, username)
+                createReminderDueNotification(reminder,
+                    username, true,
+                    reminder.latitude !="" && reminder.longitude !="",
+                    "",
+                    "")
             }
             viewModelScope.launch {
                 reminderRepository.updateReminder(
@@ -79,25 +95,45 @@ class ReminderListViewModel(private val reminder_id:String,
                         reminder.notification))
             }
             //if we are currently viewing reminder activity, navigate again to this activity to see the updated list
-            if(Graph.currentactivity.equals("Reminder")){
+            if(Graph.currentactivity == "Reminder"){
                 navController.navigate("main/$username/${reminder.creator_id}") //navigate again to activity to see the results
             }
             return
         }
-        val workManager = WorkManager.getInstance(Graph.appContext)
-        val notificationWorker = OneTimeWorkRequestBuilder<ReminderNotificationWorker>() //we use the doWork method on ReminderNotificationWorker class to do our work
-            .setInitialDelay(interval,TimeUnit.MILLISECONDS) //wait for the interval to make the notification
+
+        //val workManager = WorkManager.getInstance(Graph.appContext)
+        val notificationWorker =
+        //we use the doWork method on ReminderNotificationWorker or LocationReminderNotificationWorker class to do our work.
+        //if we have only a location requirement we run the worker class that checks constantly for location
+        if (reminder.longitude != "" && reminder.latitude != "" && reminder.reminder_time == "")
+            OneTimeWorkRequestBuilder<LocationReminderNotificationWorker>()
+                .setInputData(workDataOf("reminder_latitude" to reminder.latitude, "reminder_longitude" to reminder.longitude))
+        else
+            //At this case we only have to run the worker when its time for notification(with or without location required). So we use ReminderNotificationWorker class
+            OneTimeWorkRequestBuilder<ReminderNotificationWorker>()
+            .setInitialDelay(interval?:0,TimeUnit.MILLISECONDS) //wait for the interval to make the notification
 
         val notificationWorkerbuilded = notificationWorker.build()
-        workManager.enqueue(notificationWorkerbuilded)
-
+        Graph.listWorkmanager.enqueue(notificationWorkerbuilded)
+        
         //Monitoring for state of work
-        workManager.getWorkInfoByIdLiveData(notificationWorkerbuilded.id)
+        Graph.listWorkmanager.getWorkInfoByIdLiveData(notificationWorkerbuilded.id)
             .observeForever { workInfo ->
                 if (workInfo.state == WorkInfo.State.SUCCEEDED)
                 {
                     if(reminder.notification){
-                        createReminderDueNotification(reminder, username)
+                        //get the worker's location return values.
+                        //location worker(for reminders that require only location) returns the current location captured
+                        //when virtual/real location are inside the reminder area
+
+                        createReminderDueNotification(
+                            reminder,
+                            username,
+                            false,
+                            reminder.latitude !="" && reminder.longitude !="",
+                            workInfo.outputData.getString("userlocation_lat")?:"",
+                            workInfo.outputData.getString("userlocation_lon")?:""
+                        )
                     }
                     //after notification shows up we update this reminder with seen = true at database so it can appear in the view model
                     viewModelScope.launch {
@@ -123,6 +159,14 @@ class ReminderListViewModel(private val reminder_id:String,
         }
     }
 
+fun insideArea(reminder_latitude: Double, reminder_longitude: Double, userLocation_lat: Double?, userLocation_lon: Double?): Boolean
+{
+    if(userLocation_lat == null || userLocation_lon == null) //we pass the current or the virtual location. If either is null we return false
+        return false
+    return reminder_longitude - 0.002 <= userLocation_lon && userLocation_lon <= reminder_longitude + 0.002 &&
+           reminder_latitude - 0.002 <= userLocation_lat && userLocation_lat <= reminder_latitude
+}
+
 private fun createNotificationChannel(context: Context) {
     // Create the NotificationChannel, but only on API 26+ because
     // the NotificationChannel class is new and not in the support library
@@ -139,12 +183,70 @@ private fun createNotificationChannel(context: Context) {
     }
 }
 
-fun createReminderDueNotification(reminder: Reminder, username: String){
+private fun createReminderDueNotification(reminder: Reminder, username: String, passedreminder: Boolean, haslocation: Boolean, userlocation_lat: String, userlocation_lon: String){
     val notificationId = 1
+
+                                                        //setting the reminder title//
+    val reminder_title =
+    if(reminder.reminder_time != "" && passedreminder)
+        "Reminder occurred for user $username" //if we assigned time to reminder and is passed when we are in app
+    else if(reminder.reminder_time != "" && !passedreminder)
+        "Reminder occurring now for user $username" //if we assigned time to reminder and is occurring when we are in app
+    else
+        "Reminder occurring at a location area for user $username" //else at this case we assigned a location to reminder without time
+
+
+                                                                //setting the reminder text//
+    val reminder_text =
+    //passed reminder time without location
+    if(reminder.reminder_time != "" && passedreminder && !haslocation)
+        "Reminder already occurred at ${reminder.reminder_time} without location area set"
+
+    //occurring reminder time without location
+    else if(reminder.reminder_time != "" && !haslocation)
+        "Reminder occurring now without location area set"
+
+    //passed reminder time with location
+    else if(reminder.reminder_time != "" && passedreminder && haslocation)
+        "Reminder already occurred at ${reminder.reminder_time}." +
+        when {
+            insideArea(reminder.latitude.toDouble(), reminder.longitude.toDouble(), Graph.currentLocation?.latitude, Graph.currentLocation?.longitude) ->
+                "\nLast captured location \nLat: ${Graph.currentLocation?.latitude} \nLon: ${Graph.currentLocation?.longitude} " +
+                "\nis inside the occurring area \nLat: ${reminder.latitude} \nLon: ${reminder.longitude} " +
+                "\nbut it didn't captured at the required time"
+
+            Graph.currentLocation != null ->
+            "Last captured location \nLat: ${Graph.currentLocation?.latitude} \nLon: ${Graph.currentLocation?.longitude} \nis not inside the occurring area with center \nLat: ${reminder.latitude} and \nLon: ${reminder.longitude} "
+
+            else -> "Last location captured is null"
+        }
+    //occurring reminder time with location
+    else if(reminder.reminder_time != "" && !passedreminder && haslocation)
+        "Reminder occurring now." +
+        when {
+            //check first virtual location details and then real location's. If either are inside the reminder area notify the user with last captured location the location
+            //which is inside the area. insideArea reuturns false if any location is null
+            insideArea(reminder.latitude.toDouble(), reminder.longitude.toDouble(), Graph.virtualLocation?.latitude, Graph.virtualLocation?.longitude) ->
+            "\nLast captured location \nLat: ${Graph.virtualLocation?.latitude.toString()} \nLon: ${Graph.virtualLocation?.longitude.toString()} \nis inside the occurring area with center \nLat: ${reminder.latitude} \nLon: ${reminder.longitude}"
+
+            insideArea(reminder.latitude.toDouble(), reminder.longitude.toDouble(), Graph.currentLocation?.latitude, Graph.currentLocation?.longitude) ->
+            "\nLast captured location \nLat: ${Graph.currentLocation?.latitude.toString()} \nLon: ${Graph.currentLocation?.longitude.toString()} \nis inside the occurring area with center \nLat: ${reminder.latitude} \nLon: ${reminder.longitude}"
+
+            Graph.virtualLocation != null -> "\nLast captured location \nLat: ${Graph.virtualLocation!!.latitude} \nLon: ${Graph.virtualLocation!!.longitude} \nis not inside the occurring area \nLat: ${reminder.latitude} \nLon: ${reminder.longitude}"
+
+            Graph.currentLocation != null -> "\nLast captured location \nLat: ${Graph.currentLocation!!.latitude} \nLon: ${Graph.currentLocation!!.longitude} \nis not inside the occurring area Lat: ${reminder.latitude} \nLon: ${reminder.longitude}"
+
+            else -> "Both virtual and current user location found null"
+        }
+    //at this case the reminder is occurring because it requires only location, and we are currently in the required area
+    //either with virtual location or real location
+    else
+        "Reminder occurring now at \nLat: $userlocation_lat \nLon: $userlocation_lon"
+
     val builder = NotificationCompat.Builder(Graph.appContext, "CHANNEL_ID")
         .setSmallIcon(R.drawable.ic_launcher_background)
-        .setContentTitle("Reminder occurring for user $username")
-        .setStyle(NotificationCompat.BigTextStyle().bigText("Reminder ${reminder.message} is occurring now at location (${reminder.longitude},${reminder.latitude})"))
+        .setContentTitle(reminder_title)
+        .setStyle(NotificationCompat.BigTextStyle().bigText(reminder_text))
         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
     with(NotificationManagerCompat.from(Graph.appContext)) {

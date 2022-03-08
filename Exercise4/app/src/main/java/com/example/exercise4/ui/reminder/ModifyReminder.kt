@@ -244,7 +244,7 @@ fun ModifyReminder(nav: NavController,
                         creator_id = userid.toLong(),
                         creation_time = Date().time,
                         reminder_time = reminder_date.value,
-                        reminder_seen = reminder_date.value == "",
+                        reminder_seen = reminder_date.value == "" && reminder_latitude.value == "" && reminder_longitude.value == "" && location==null ,
                         //if time and location is empty this is true. We consider reminders without time and location set as seen
                         notification = reminder_notification.value),
                         navController = nav)
@@ -256,10 +256,9 @@ fun ModifyReminder(nav: NavController,
                         creator_id = userid.toLong(),
                         creation_time = Date().time,
                         reminder_time = reminder_date.value,
-                        reminder_seen = reminder_date.value == ""
+                        reminder_seen = reminder_date.value == "" && reminder_latitude.value == "" && reminder_longitude.value == "" && location==null
                         ,
                         notification = reminder_notification.value), navController = nav)
-
                 }
             } , text = "Done")
         }

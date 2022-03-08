@@ -36,6 +36,7 @@ object UserInitialisaton : ViewModel() {
         viewModelScope.launch {
             if(reminderRepository.selectReminder(reminder)==null){
                 reminderRepository.updateReminder(reminder)
+                Graph.listWorkmanager.cancelAllWork() //Cancel all work in case a reminder location modified. During rerun, location workers are going to check for the new location
                 navController.navigate("main/${username}/${reminder.creator_id}")
             }else{
                 navController.navigate("fail/There is already a reminder like that")

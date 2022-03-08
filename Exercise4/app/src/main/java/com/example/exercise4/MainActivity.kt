@@ -14,6 +14,7 @@ import androidx.compose.material.Surface
 import androidx.core.content.ContextCompat
 import com.example.exercise4.ui.theme.Exercise1Theme
 import com.google.android.gms.location.*
+import com.google.android.gms.maps.model.LatLng
 
 class MainActivity : ComponentActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -31,7 +32,8 @@ class MainActivity : ComponentActivity() {
 
         //If we accept the location permissions we set the current location value
         fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-            Graph.currentLocation = location
+            if(location != null)
+                Graph.currentLocation = LatLng(location.latitude, location.longitude)
         }
 
         val locationPermissionRequest = registerForActivityResult(
@@ -56,16 +58,15 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        when //when the permissions are already accepted set locationpermition true to let update location function run
+        when (PackageManager.PERMISSION_GRANTED) //when the permissions are already accepted set locationpermition true to let update location function run
         {
             ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED ||
-                    ContextCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                    ) == PackageManager.PERMISSION_GRANTED -> {
+            ), ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) -> {
                 locationpermission = true
             }
             else -> //else ask user for permissions
@@ -77,7 +78,6 @@ class MainActivity : ComponentActivity() {
                     )
                 )
             }
-
         }
         //location update request. We update the request every 2 seconds
         locationRequest = LocationRequest.create().apply {
@@ -91,8 +91,8 @@ class MainActivity : ComponentActivity() {
             override fun onLocationResult(locationResult: LocationResult) {
                 locationResult ?: return
                 for (location in locationResult.locations) {
-                    Graph.currentLocation = location
-                    Log.i("Location", "Location changed")
+                    Graph.currentLocation = LatLng(location.latitude, location.longitude)
+                    Log.i("Location", "Location changed ${Graph.currentLocation!!.latitude} ${Graph.currentLocation!!.longitude}")
                 }
             }
         }
