@@ -102,11 +102,3 @@ fun Login(
     }
 
 }
-
-//@Preview
-//@Composable
-//fun DefaultPreview() {
-//    val appState = rememberAppState()
-//    Login(navController = appState.navController)
-//
-//}

@@ -1,5 +1,6 @@
 package com.example.exercise4
 
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
@@ -38,10 +39,9 @@ fun ApplicationActivities(appState: ApplicationState = rememberAppState())
             backstackentry.arguments?.getString("username")?:"",
             backstackentry.arguments?.getString("userid")?:"")
 
-            //We navigate multiple times at main activity during list update so we do this
-            //in order to go back with only one back press
+            //We want to stop workers because we logout
             BackHandler(true) {
-                appState.navController.navigate("login")
+                Graph.listWorkmanager.cancelAllWork()
             }
         }
         composable(route="profile/{username}/{userid}") //route for profile view destination.
@@ -62,11 +62,12 @@ fun ApplicationActivities(appState: ApplicationState = rememberAppState())
             backstackentry.arguments?.getString("userid")?:"",
             backstackentry.arguments?.getString("reminder_id")?:"")
         }
-        composable(route = "remindermap/{position}") //route for google map we pass the marker's location if there is already one set
+        composable(route = "remindermap/{position}/{setvirtual}") //route for google map we pass the marker's location if there is already one set
         {
             backstackentry->
             ReminderLocationMap(navController = appState.navController,
-                backstackentry.arguments?.getString("position")?:"")
+                backstackentry.arguments?.getString("position")?:"",
+                backstackentry.arguments?.getString("setvirtual")?:"")
         }
 
     }

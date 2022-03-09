@@ -3,10 +3,14 @@ package com.example.exercise4
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.workDataOf
 import com.example.exercise4.entities.Reminder
 import com.example.exercise4.entities.User
 import com.example.exercise4.repository.ReminderRepository
 import com.example.exercise4.repository.UserRepository
+import com.example.exercise4.ui.reminder.reminderList.ReminderListViewModel
+import com.example.exercise4.util.LocationReminderNotificationWorker
 import kotlinx.coroutines.launch
 
 //This class is for the database management of the users. We initialise some users at the beginning
@@ -32,12 +36,24 @@ object UserInitialisaton : ViewModel() {
     }
 
     //this function updates a reminder
-    fun updateReminder(username: String, reminder: Reminder, navController: NavController){
+    fun updateReminder(username: String, newreminder: Reminder, oldreminder: Reminder, navController: NavController){
         viewModelScope.launch {
-            if(reminderRepository.selectReminder(reminder)==null){
-                reminderRepository.updateReminder(reminder)
-                Graph.listWorkmanager.cancelAllWork() //Cancel all work in case a reminder location modified. During rerun, location workers are going to check for the new location
-                navController.navigate("main/${username}/${reminder.creator_id}")
+            if(reminderRepository.selectReminder(newreminder)==null){
+                reminderRepository.updateReminder(newreminder)
+                //Cancel the work for this updating reminder's old version in case the reminder location modified and the reminder requires only location
+                //During the new reminder work rerun, it is going to check for the new location
+                if(oldreminder.reminder_time == "" && oldreminder.longitude != "" && oldreminder.latitude !="" && !oldreminder.reminder_seen)
+                    Graph.listWorkmanager.cancelAllWorkByTag(oldreminder.id.toString())
+//                if(oldreminder.reminder_time == "" && oldreminder.longitude != "" && oldreminder.latitude !="" && !oldreminder.reminder_seen)
+//                {
+//                    Graph.listWorkmanager.cancelAllWorkByTag(oldreminder.id.toString())
+//                    val locationWorker = OneTimeWorkRequestBuilder<LocationReminderNotificationWorker>()
+//                        .setInputData(workDataOf("reminder_latitude" to newreminder.latitude, "reminder_longitude" to newreminder.longitude))
+//                        .addTag(newreminder.id.toString()) //set tag to location worker in order to cancel it later
+//                    Graph.listWorkmanager.enqueue(locationWorker.build())
+//                }
+
+                navController.navigate("main/${username}/${newreminder.creator_id}")
             }else{
                 navController.navigate("fail/There is already a reminder like that")
             }

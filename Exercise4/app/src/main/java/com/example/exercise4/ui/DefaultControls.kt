@@ -3,6 +3,7 @@ package com.example.exercise4.ui
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -32,7 +33,7 @@ fun defButton(onclick: ()->Unit, text: String){
         onClick = onclick,
         enabled = true,
         modifier = Modifier
-            .width(220.dp)
+            .wrapContentWidth()
             .height(55.dp),
         shape = Shapes.small,
         colors = ButtonDefaults.buttonColors(backgroundColor = mainorange)

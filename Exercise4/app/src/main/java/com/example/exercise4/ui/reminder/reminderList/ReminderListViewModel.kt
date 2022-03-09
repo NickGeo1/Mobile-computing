@@ -25,15 +25,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import java.lang.reflect.Array.get
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 
 class ReminderListViewModel(private val reminder_id:String,
                             private val userid: String,
-                            private val navController: NavController,
                             private val reminderRepository: ReminderRepository = Graph.reminderRepository,
-                            private val userRepository: UserRepository = Graph.userRepository) : ViewModel() {
+                            private val userRepository: UserRepository = Graph.userRepository,
+                            private val changeview: (List<Reminder>) -> Unit) : ViewModel() {
     private val _state = MutableStateFlow(ReminderViewState())
 
     val state: StateFlow<ReminderViewState>
@@ -61,19 +62,25 @@ class ReminderListViewModel(private val reminder_id:String,
         }
     }
 
-    private fun checkUnseenReminderNotification(reminder: Reminder, username: String) {
+    fun checkUnseenReminderNotification(reminder: Reminder, username: String) {
         var interval: Long? = null
+        val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm")
 
         if(reminder.reminder_time != "")
         {
-            val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm")
-            val todaysdate = Date()
-            val todaysdate_without_minutes = formatter.parse(formatter.format(todaysdate)).time //from date object to string with the desired format and then again to Date
+            val todaysdate = Date().time
             val reminderdate = formatter.parse(reminder.reminder_time).time //From string to Date as long
-            interval = reminderdate - todaysdate_without_minutes
+            interval = reminderdate - todaysdate
         }
 
-        if(interval != null && interval < 0){ //if this unseen reminder has already pass make the notification and update it as seen
+        val current_calendar = Calendar.getInstance()
+        current_calendar.time = Date() // Set your date object here
+
+        val reminder_calendar = Calendar.getInstance()
+        reminder_calendar.time = formatter.parse(reminder.reminder_time) // Set your date object here
+
+        //if this unseen reminder has already pass(current minutes > reminder minutes) make the notification and update it as seen
+        if(interval != null && interval < 0 && current_calendar.get(Calendar.MINUTE) > reminder_calendar.get(Calendar.MINUTE)){
             if(reminder.notification){
                 createReminderDueNotification(reminder,
                     username, true,
@@ -93,13 +100,11 @@ class ReminderListViewModel(private val reminder_id:String,
                         reminder.creator_id,
                         true,
                         reminder.notification))
-            }
-            //if we are currently viewing reminder activity, navigate again to this activity to see the updated list
-            if(Graph.currentactivity == "Reminder"){
-                navController.navigate("main/$username/${reminder.creator_id}") //navigate again to activity to see the results
+                changeview(reminderRepository.selectuserReminders(userid.toLong(), false)) //we update the list view and we show again only the seen reminders
             }
             return
-        }
+        }else if(current_calendar.get(Calendar.MINUTE) == reminder_calendar.get(Calendar.MINUTE)) //if the minutes are same make a work with interval 0
+            interval = 0
 
         //val workManager = WorkManager.getInstance(Graph.appContext)
         val notificationWorker =
@@ -108,6 +113,7 @@ class ReminderListViewModel(private val reminder_id:String,
         if (reminder.longitude != "" && reminder.latitude != "" && reminder.reminder_time == "")
             OneTimeWorkRequestBuilder<LocationReminderNotificationWorker>()
                 .setInputData(workDataOf("reminder_latitude" to reminder.latitude, "reminder_longitude" to reminder.longitude))
+                .addTag(reminder.id.toString()) //set tag to location worker in order to cancel it later
         else
             //At this case we only have to run the worker when its time for notification(with or without location required). So we use ReminderNotificationWorker class
             OneTimeWorkRequestBuilder<ReminderNotificationWorker>()
@@ -115,7 +121,7 @@ class ReminderListViewModel(private val reminder_id:String,
 
         val notificationWorkerbuilded = notificationWorker.build()
         Graph.listWorkmanager.enqueue(notificationWorkerbuilded)
-        
+
         //Monitoring for state of work
         Graph.listWorkmanager.getWorkInfoByIdLiveData(notificationWorkerbuilded.id)
             .observeForever { workInfo ->
@@ -148,11 +154,7 @@ class ReminderListViewModel(private val reminder_id:String,
                                 reminder.creator_id,
                                 true,
                                 reminder.notification))
-
-                    }
-                    //if we are currently viewing reminder activity, navigate again to this activity to see the updated list
-                    if(Graph.currentactivity.equals("Reminder")){
-                        navController.navigate("main/$username/${reminder.creator_id}")
+                        changeview(reminderRepository.selectuserReminders(userid.toLong(), false))
                     }
                 }
             }
@@ -193,7 +195,7 @@ private fun createReminderDueNotification(reminder: Reminder, username: String, 
     else if(reminder.reminder_time != "" && !passedreminder)
         "Reminder occurring now for user $username" //if we assigned time to reminder and is occurring when we are in app
     else
-        "Reminder occurring at a location area for user $username" //else at this case we assigned a location to reminder without time
+        "Reminder occurring at a location \narea for user $username" //else at this case we assigned a location to reminder without time
 
 
                                                                 //setting the reminder text//

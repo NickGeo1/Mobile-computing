@@ -32,13 +32,13 @@ fun ReminderListElement(username:String, userid:String, nav:NavController)
 {
     val show_btn_text = rememberSaveable { mutableStateOf("Show all")}
     val show_all = rememberSaveable { mutableStateOf(false)}
+    val showlist: MutableState<List<Reminder>> = rememberSaveable {mutableStateOf(listOf())}
 
     val viewModel: ReminderListViewModel = viewModel(
         key = "user_list_$userid",
-        factory = viewModelProviderFactoryOf { ReminderListViewModel("0",userid,nav) }
+        factory = viewModelProviderFactoryOf { ReminderListViewModel("0",userid,changeview = {newview -> showlist.value = newview; show_btn_text.value = "Show all"}) }
     )
     val viewState by viewModel.state.collectAsState()
-    val showlist: MutableState<List<Reminder>> = rememberSaveable {mutableStateOf(listOf())}
     val coroutineScope = rememberCoroutineScope()
 
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -58,20 +58,27 @@ fun ReminderListElement(username:String, userid:String, nav:NavController)
             showall = show_all.value
         )
         Spacer(Modifier.height(30.dp))
-        defButton(onclick = {
-            if(show_btn_text.value.equals("Show all"))
-            {
-                show_btn_text.value = "Show seen"
-                show_all.value = true
-            }else
-            {
-                show_btn_text.value = "Show all"
-                show_all.value = false
-            }
-            coroutineScope.launch {
-                showlist.value = viewModel.changeShow(show_all.value) //we return the new results at showlist that changes the lazycolumn
-            }
-        }, text = show_btn_text.value)
+        Row {
+            defButton(onclick = {
+                if(show_btn_text.value.equals("Show all"))
+                {
+                    show_btn_text.value = "Show seen"
+                    show_all.value = true
+                }else
+                {
+                    show_btn_text.value = "Show all"
+                    show_all.value = false
+                }
+                coroutineScope.launch {
+                    showlist.value = viewModel.changeShow(show_all.value) //we return the new results at showlist that changes the lazycolumn
+                }
+            }, text = show_btn_text.value)
+
+            Spacer(Modifier.width(30.dp))
+
+            defButton(onclick = {Graph.markeradded = false ; nav.navigate("remindermap/,/${true}")}, text = "Set virtual location")
+        }
+
     }
 
 }
@@ -265,6 +272,11 @@ private fun ReminderListItem(
                                 coroutineScope.launch {
                                     onelementdelete(Graph.reminderRepository.selectuserReminders(userid.toLong(), showall)) //set showlist.value equal to the new list after deletion
                                 }
+
+                                //if this reminder has only location requirement and is unseen, we have to stop the worker associated with it as soon as we delete it
+                                //each location worker has a tag equal to the id of the reminder
+                                if(reminder.latitude != "" && reminder.longitude != "" && reminder.reminder_time == "" && !reminder.reminder_seen)
+                                    Graph.listWorkmanager.cancelAllWorkByTag(reminder.id.toString())
                             },
                             //nav.navigate("main/$username/$userid")}, //we renavigate after the delete so we can see the results
                             modifier = Modifier

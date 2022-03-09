@@ -1,6 +1,7 @@
 package com.example.exercise4.util
 
 import android.content.Context
+import android.util.Log
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import java.lang.Exception
@@ -13,7 +14,7 @@ class ReminderNotificationWorker(
     override fun doWork(): Result {
 
         return try{
-        println("Interval completed, Work returning success")
+        Log.i("Status:","Interval completed, Work returning success")
             Result.success()
         }catch(e:Exception){
             Result.failure()

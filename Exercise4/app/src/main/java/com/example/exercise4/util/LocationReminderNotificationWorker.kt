@@ -35,20 +35,21 @@ class LocationReminderNotificationWorker(
 
             while(true)
             {
-                if(isStopped)
+                if(isStopped){
                     return Result.failure()
+                }
 
                 if(Graph.currentLocation != null)
                 {
                     currentinsidesquare =
                         reminder_lon - 0.002 <= Graph.currentLocation!!.longitude && Graph.currentLocation!!.longitude <= reminder_lon + 0.002 &&
-                        reminder_lat - 0.002 <= Graph.currentLocation!!.latitude && Graph.currentLocation!!.latitude <= reminder_lat
+                        reminder_lat - 0.002 <= Graph.currentLocation!!.latitude && Graph.currentLocation!!.latitude <= reminder_lat + 0.002
                 }
                 if(Graph.virtualLocation != null)
                 {
                     virtualinsidesquare =
                         reminder_lon - 0.002 <= Graph.virtualLocation!!.longitude && Graph.virtualLocation!!.longitude <= reminder_lon + 0.002 &&
-                        reminder_lat - 0.002 <= Graph.virtualLocation!!.latitude && Graph.virtualLocation!!.latitude <= reminder_lat
+                        reminder_lat - 0.002 <= Graph.virtualLocation!!.latitude && Graph.virtualLocation!!.latitude <= reminder_lat + 0.002
                 }
                 if(Graph.currentLocation == null && Graph.virtualLocation == null)
                 {

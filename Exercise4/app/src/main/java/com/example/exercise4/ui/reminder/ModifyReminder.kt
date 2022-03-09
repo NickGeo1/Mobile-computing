@@ -39,7 +39,7 @@ fun ModifyReminder(nav: NavController,
                    reminder_id: String,
                    viewModel: ReminderListViewModel = viewModel(
                        key = "user_reminder_$reminder_id",
-                       factory = viewModelProviderFactoryOf { ReminderListViewModel(reminder_id,"0", nav) }
+                       factory = viewModelProviderFactoryOf { ReminderListViewModel(reminder_id,"0", changeview = {}) }
                    )
                 )
 {
@@ -194,26 +194,19 @@ fun ModifyReminder(nav: NavController,
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            Button(
-                onClick =
+            defButton(
+                onclick =
                 {
                     val mapnavigate = when (location)
                     {
-                        null -> "remindermap/${reminder_latitude.value},${reminder_longitude.value}"
-                        else -> "remindermap/${location.latitude},${location.longitude}"
+                        null -> "remindermap/${reminder_latitude.value},${reminder_longitude.value}/${false}"
+                        else -> "remindermap/${location.latitude},${location.longitude}/${false}"
                     }
                     Graph.markeradded = false
                     nav.navigate(mapnavigate)
                 },
-                enabled = true,
-                modifier = Modifier
-                    .wrapContentWidth()
-                    .height(55.dp),
-                shape = Shapes.small,
-                colors = ButtonDefaults.buttonColors(backgroundColor = mainorange)
-            ){
-                defText("Choose map location", Color.Black)
-            }
+                text = "Choose map location"
+            )
 
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -258,7 +251,7 @@ fun ModifyReminder(nav: NavController,
                         reminder_time = reminder_date.value,
                         reminder_seen = reminder_date.value == "" && reminder_latitude.value == "" && reminder_longitude.value == "" && location==null
                         ,
-                        notification = reminder_notification.value), navController = nav)
+                        notification = reminder_notification.value), oldreminder = reminder , navController = nav)
                 }
             } , text = "Done")
         }
