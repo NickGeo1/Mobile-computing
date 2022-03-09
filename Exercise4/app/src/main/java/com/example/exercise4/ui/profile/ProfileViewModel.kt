@@ -24,4 +24,4 @@ class ProfileViewModel (private val userRepository: UserRepository = Graph.userR
 
 }
 
-data class ProfileViewState(val userimage: ByteArray? = null)
+data class ProfileViewState(var userimage: ByteArray? = null)

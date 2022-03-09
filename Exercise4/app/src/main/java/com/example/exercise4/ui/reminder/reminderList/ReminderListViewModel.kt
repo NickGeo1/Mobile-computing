@@ -236,7 +236,8 @@ private fun createReminderDueNotification(reminder: Reminder, username: String, 
     //at this case the reminder is occurring because it requires only location, and we are currently in the required area
     //either with virtual location or real location
     else
-        "Reminder occurring now at \nLat: $userlocation_lat \nLon: $userlocation_lon"
+        "Reminder occurring now at \nLat: $userlocation_lat \nLon: $userlocation_lon.\nReminder area is\nLat: ${reminder.latitude} \n" +
+                "Lon: ${reminder.longitude} "
 
     val builder = NotificationCompat.Builder(Graph.appContext, "CHANNEL_ID")
         .setSmallIcon(R.drawable.ic_launcher_background)

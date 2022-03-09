@@ -151,8 +151,8 @@ private fun ReminderList(
             },
             title = { Text(text = "Your reminder details") },
             text = { Text(text = "Message: ${message.value}\n\n" +
-                                 "Latitude: ${latitude.value}\n\n" +
-                                 "Longitude: ${longitude.value}\n\n" +
+                                 "Area center latitude: ${latitude.value}\n\n" +
+                                 "Area center longitude: ${longitude.value}\n\n" +
                                  "Reminder/notification time: ${rem_time.value}\n\n" +
                                  "Last modified at: ${creation_time.value}\n\n" +
                                  "Notification enabled: ${if(reminder_notification.value){"true"} else {"false"}}")

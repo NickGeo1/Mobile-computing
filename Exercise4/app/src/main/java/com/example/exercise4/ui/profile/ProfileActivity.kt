@@ -108,6 +108,8 @@ fun ProfileActivity(nav: NavHostController, username: String, userid: String) {
                         contentDescription = "account_img",
                         modifier = Modifier.size(200.dp)
                     )
+                    bitmap.value = null
+                    viewState.userimage = data.toByteArray()
                 }
                 else if(viewState.userimage != null)
                 {
@@ -138,6 +140,7 @@ fun ProfileActivity(nav: NavHostController, username: String, userid: String) {
 
             Spacer(modifier = Modifier.height(10.dp))
 
+            Log.i("Stoixeiaaaaa", "$userid $username ${txtusername.value}")
             defButton(onclick = { UserInitialisaton.updateUser(userid, username, txtusername.value, nav)
                                 }, text = "Change")
         }
