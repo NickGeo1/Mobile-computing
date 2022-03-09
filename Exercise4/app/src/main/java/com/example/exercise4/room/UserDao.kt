@@ -18,6 +18,6 @@ abstract class UserDao {
     @Update(onConflict = OnConflictStrategy.REPLACE) //When user wants to change username/picture
     abstract suspend fun updateUser(entity: User)
 
-    @Delete
-    abstract suspend fun deleteUser(entity: User) //For user delete
+//    @Delete
+//    abstract suspend fun deleteUser(entity: User) //For user delete
 }

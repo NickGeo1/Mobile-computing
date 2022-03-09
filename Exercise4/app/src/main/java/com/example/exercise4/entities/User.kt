@@ -1,5 +1,6 @@
 package com.example.exercise4.entities
 
+import android.graphics.Bitmap
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
@@ -18,5 +19,5 @@ data class User(
     @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") var id: Long = 0,
     @ColumnInfo(name = "username") var username: String,
     @ColumnInfo(name = "password") val password: String,
-    @ColumnInfo(name = "img") var img: String?
+    @ColumnInfo(name = "img") var img: ByteArray
 )

@@ -25,8 +25,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         UserInitialisaton.Initialisaton() //insert predefined users in db
-        Graph.markeradded =
-            false //every time map recomposes after screen rotate we have to set this value to false so it can add the marker again
+        Graph.markeradded = false //every time map recomposes after screen rotate we have to set this value to false so it can add the marker again
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 

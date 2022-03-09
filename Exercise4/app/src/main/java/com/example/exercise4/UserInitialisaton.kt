@@ -1,5 +1,6 @@
 package com.example.exercise4
 
+import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
@@ -9,6 +10,7 @@ import com.example.exercise4.entities.Reminder
 import com.example.exercise4.entities.User
 import com.example.exercise4.repository.ReminderRepository
 import com.example.exercise4.repository.UserRepository
+import com.example.exercise4.ui.profile.toByteArray
 import com.example.exercise4.ui.reminder.reminderList.ReminderListViewModel
 import com.example.exercise4.util.LocationReminderNotificationWorker
 import kotlinx.coroutines.launch
@@ -22,10 +24,17 @@ object UserInitialisaton : ViewModel() {
 
     fun Initialisaton() //Initialisation of users(we haven't added any images yet)
     {
+        val conf = Bitmap.Config.ARGB_8888 // see other conf types.
+
+        val bmp = Bitmap.createBitmap(
+            200,
+            200,
+            conf
+        ) // this creates a MUTABLE bitmap.
         val userlist = mutableListOf<User>(
-            User(username = "nikos", password = "nikos", img = ""),
-            User(username = "nikos2",password ="nikos2", img =""),
-            User(username = "nikos3",password ="nikos3", img =""))
+            User(username = "nikos", password = "nikos", img = bmp.toByteArray()),
+            User(username = "nikos2",password ="nikos2", img = bmp.toByteArray()),
+            User(username = "nikos3",password ="nikos3", img = bmp.toByteArray()))
 
         viewModelScope.launch{
             userlist.forEach {
@@ -44,15 +53,6 @@ object UserInitialisaton : ViewModel() {
                 //During the new reminder work rerun, it is going to check for the new location
                 if(oldreminder.reminder_time == "" && oldreminder.longitude != "" && oldreminder.latitude !="" && !oldreminder.reminder_seen)
                     Graph.listWorkmanager.cancelAllWorkByTag(oldreminder.id.toString())
-//                if(oldreminder.reminder_time == "" && oldreminder.longitude != "" && oldreminder.latitude !="" && !oldreminder.reminder_seen)
-//                {
-//                    Graph.listWorkmanager.cancelAllWorkByTag(oldreminder.id.toString())
-//                    val locationWorker = OneTimeWorkRequestBuilder<LocationReminderNotificationWorker>()
-//                        .setInputData(workDataOf("reminder_latitude" to newreminder.latitude, "reminder_longitude" to newreminder.longitude))
-//                        .addTag(newreminder.id.toString()) //set tag to location worker in order to cancel it later
-//                    Graph.listWorkmanager.enqueue(locationWorker.build())
-//                }
-
                 navController.navigate("main/${username}/${newreminder.creator_id}")
             }else{
                 navController.navigate("fail/There is already a reminder like that")

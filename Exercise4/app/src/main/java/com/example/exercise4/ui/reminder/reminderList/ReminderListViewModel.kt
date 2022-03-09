@@ -73,14 +73,8 @@ class ReminderListViewModel(private val reminder_id:String,
             interval = reminderdate - todaysdate
         }
 
-        val current_calendar = Calendar.getInstance()
-        current_calendar.time = Date() // Set your date object here
-
-        val reminder_calendar = Calendar.getInstance()
-        reminder_calendar.time = formatter.parse(reminder.reminder_time) // Set your date object here
-
-        //if this unseen reminder has already pass(current minutes > reminder minutes) make the notification and update it as seen
-        if(interval != null && interval < 0 && current_calendar.get(Calendar.MINUTE) > reminder_calendar.get(Calendar.MINUTE)){
+        //if this unseen reminder has already pass make the notification and update it as seen
+        if(interval != null && interval < 0){
             if(reminder.notification){
                 createReminderDueNotification(reminder,
                     username, true,
@@ -103,8 +97,7 @@ class ReminderListViewModel(private val reminder_id:String,
                 changeview(reminderRepository.selectuserReminders(userid.toLong(), false)) //we update the list view and we show again only the seen reminders
             }
             return
-        }else if(current_calendar.get(Calendar.MINUTE) == reminder_calendar.get(Calendar.MINUTE)) //if the minutes are same make a work with interval 0
-            interval = 0
+        }
 
         //val workManager = WorkManager.getInstance(Graph.appContext)
         val notificationWorker =
